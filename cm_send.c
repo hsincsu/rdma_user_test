@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <fcntl.h>
+
 #include <asm/ioctls.h>
 #include <netdb.h>
 #include <malloc.h>
