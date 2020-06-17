@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     int buflen;
     int data;
 
-    buf[0] = 12345;
+    buf[0] = inet_addr("10.0.0.5");
     fd = open("/dev/cm_rw",O_RDWR);
     if(fd < 0){
         printf("can't open /dev/cm_rw \n");
