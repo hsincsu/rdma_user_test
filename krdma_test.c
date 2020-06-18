@@ -155,16 +155,47 @@ struct krdma_cb{
         int frtest;			/* reg test */
 	    int tos;			/* type of service */
 
+        //just user rdma_cm_id to find the ib_device,we don't need rdma_connect to exchange info.because we don't support it now.
+        struct rdma_cm_id *cm_id;	/* connection on client side,*/
+					/* listener on server side. */
+	    struct rdma_cm_id *child_cm_id;	/* connection on server side */
 
         struct list_head list;
 
 };
 
+static int reg_supported(struct ib_device *dev)
+{
+	u64 needed_flags = IB_DEVICE_MEM_MGT_EXTENSIONS;
 
+	if ((dev->attrs.device_cap_flags & needed_flags) != needed_flags) {
+		printk( "Fastreg not supported - device_cap_flags 0x%llx\n",
+			(unsigned long long)dev->attrs.device_cap_flags);
+		return 0;
+	}
+	DEBUG_LOG("Fastreg supported - device_cap_flags 0x%llx\n",
+		(unsigned long long)dev->attrs.device_cap_flags);
+	return 1;
+}
 
 static void krdma_run_server(struct krdma_cb *cb)
 {
     printk("run server \n");
+    //.crate pd, mr.cq ,wait for info from client
+    struct sockaddr_storage sin;
+    int ret;
+
+    ret = rdma_bind_addr(cb->cm_id, (struct sockaddr *)&sin); //find ib_device & get src ip;
+    if (ret) {
+		printk("rdma_bind_addr error %d\n", ret);
+		return ret;
+	}
+    DEBUG_LOG("rdma_bind_addr successful\n");
+
+    if(!reg_supported(cb->cm_id->device))
+            return -EINVAL;
+
+    return ;
 }
 
 
@@ -302,6 +333,15 @@ int krdma_doit(char *cmd)
 		goto out;
 	}
 
+    cb->cm_id = rdma_create_id(&init_net, NULL, cb, RDMA_PS_TCP, IB_QPT_RC);
+    if (IS_ERR(cb->cm_id)) {
+		ret = PTR_ERR(cb->cm_id);
+		printk("rdma_create_id error %d\n", ret);
+		goto out;
+	}
+    DEBUG_LOG("created cm_id %p\n", cb->cm_id); 
+
+
     if(cb->server)
             krdma_run_server(cb);
     else
@@ -309,6 +349,8 @@ int krdma_doit(char *cmd)
             krdma_run_client(cb);
     }
 
+    DEBUG_LOG("destroy cm_id %p\n", cb->cm_id);
+    rdma_destroy_id(cb->cm_id);
     out:
     mutex_lock(&krdma_mutex);
     list_del(&cb->list);
