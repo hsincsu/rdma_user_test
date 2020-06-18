@@ -24,13 +24,11 @@
 #include <rdma/rdma_cm.h>
 #include "getopt.h"
 
-static int debug = 0;
-module_param(debug, int , 0);
-MODULE_PARM_DESC(debug, "Debug level (0 =none, 1 = all)");
+static int debug = 1;
 #define DEBUG_LOG if (debug) printk
 
 MODULE_AUTHOR("HS");
-MODULE_DESCRIPTION("Kernel RDMA Test");
+MODULE_DESCRIPTION("KERNEL RDMA TEST");
 MODULE_LICENSE("Dual BSD/GPL");
 
 static const struct krdma_option krdma_opts[] = {
