@@ -189,6 +189,7 @@ static void fill_sockaddr(struct sockaddr_storage *sin, struct krping_cb *cb)
 		memcpy((void *)&sin4->sin_addr.s_addr, cb->addr, 4);
 		sin4->sin_port = cb->port;
 	} else if (cb->addr_type == AF_INET6) {
+        #if 0
 		struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)sin;
 		sin6->sin6_family = AF_INET6;
 		memcpy((void *)&sin6->sin6_addr, cb->addr, 16);
@@ -202,6 +203,7 @@ static void fill_sockaddr(struct sockaddr_storage *sin, struct krping_cb *cb)
 				dev_put(ndev);
 			}
 		}
+        #endif
 	}
 }
 
