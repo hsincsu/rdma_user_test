@@ -179,7 +179,7 @@ static int reg_supported(struct ib_device *dev)
 }
 
 
-static void fill_sockaddr(struct sockaddr_storage *sin, struct krping_cb *cb)
+static void fill_sockaddr(struct sockaddr_storage *sin, struct krdma_cb *cb)
 {
 	memset(sin, 0, sizeof(*sin));
 
