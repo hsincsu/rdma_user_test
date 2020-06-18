@@ -22,6 +22,9 @@
 #define KERNEL_CM_RECV (unsigned int) 1
 #define PRINT_MAC	   (unsigned int) 6
 
+#define PRINT_CM	   (unsigned int) 3
+#define PRINT_PGU	   (unsigned int) 4
+#define PRINT_PHD	   (unsigned int) 5
 
 ioctl_operation(int cmd, int *buf)
 {
@@ -50,6 +53,7 @@ while(1){
     printf("1. CM SEND\n");
     printf("2. CM RECV\n");
     printf("3. PRINT MAC(use dmesg to check)\n");
+    printf("other function may support later\n");
     printf("4. exit\n");
     printf("please choose:");
     scanf("%d",&choose);
