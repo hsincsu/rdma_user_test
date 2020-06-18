@@ -20,7 +20,7 @@
 
 #define KERNEL_CM_SEND (unsigned int) 0
 #define KERNEL_CM_RECV (unsigned int) 1
-#define PRINT_MAC	   (unsigned int) 2
+#define PRINT_MAC	   (unsigned int) 6
 
 
 ioctl_operation(int cmd, int *buf)
@@ -52,7 +52,7 @@ while(1){
     printf("3. PRINT MAC(use dmesg to check)\n");
     printf("4. exit\n");
     printf("please choose:");
-    scanf("%d \n",&choose);
+    scanf("%d",&choose);
 
     buf[0] = ntohl(inet_addr("10.0.0.5"));
 
