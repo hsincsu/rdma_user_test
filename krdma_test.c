@@ -282,7 +282,7 @@ int krdma_doit(char *cmd)
                 DEBUG_LOG("fast-reg test!\n");
                 break;
              default:
-                printk(KERN_ERR PFX "unknown opt %s\n", optarg);
+                printk("unknown opt %s\n", optarg);
                 ret = -EINVAL;
                 break;       
                     }
