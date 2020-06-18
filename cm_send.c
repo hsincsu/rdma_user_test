@@ -22,20 +22,27 @@
 #define KERNEL_CM_RECV (unsigned int) 1
 #define PRINT_MAC	   (unsigned int) 2
 
+
+ioctl_operation(int cmd, int *buf)
+{
+    int fd;
+    
+    fd = open("/dev/cm_rw",O_RDWR);
+    if(fd < 0){
+        printf("can't open /dev/cm_rw \n");
+        return ;
+    }
+    ioctl(fd,cmd,buf);    
+    close(fd);
+
+}
+
 int main(int argc, char *argv[])
 {
     int fd;
     int buf[4];
     int buflen;
-    int data;
-
-    buf[0] = ntohl(inet_addr("10.0.0.5"));
-    fd = open("/dev/cm_rw",O_RDWR);
-    if(fd < 0){
-        printf("can't open /dev/cm_rw \n");
-        return;
-    }
-
+    int data;    
     int choose;
 
 while(1){
@@ -47,29 +54,32 @@ while(1){
     printf("please choose:");
     scanf("%d \n",&choose);
 
+    buf[0] = ntohl(inet_addr("10.0.0.5"));
+
     switch(choose)
     {
         case 1:
         {
-            ioctl(fd,KERNEL_CM_SEND,buf);
+            printf("cm send \n");
+            ioctl_operation(KERNEL_CM_SEND,buf);break;
         }
         case 2:
         {
-            ioctl(fd,KERNEL_CM_RECV,buf);
+            printf("cm recv \n");
+            ioctl_operation(KERNEL_CM_RECV,buf);break;
         }
         case 3:
         {
-            ioctl(fd,PRINT_MAC,buf);
+            printf("print mac \n");
+            ioctl_operation(PRINT_MAC,buf);break;
         }
         default:
-        break;
+            break;
     }
     if(choose == 4)
         break;
 
     }
 
-    //ioctl(fd,KERNEL_CM_SEND,buf);
-    close(fd);
     return 0;
 }
