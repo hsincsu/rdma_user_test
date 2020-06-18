@@ -178,12 +178,41 @@ static int reg_supported(struct ib_device *dev)
 	return 1;
 }
 
+
+static void fill_sockaddr(struct sockaddr_storage *sin, struct krping_cb *cb)
+{
+	memset(sin, 0, sizeof(*sin));
+
+	if (cb->addr_type == AF_INET) {
+		struct sockaddr_in *sin4 = (struct sockaddr_in *)sin;
+		sin4->sin_family = AF_INET;
+		memcpy((void *)&sin4->sin_addr.s_addr, cb->addr, 4);
+		sin4->sin_port = cb->port;
+	} else if (cb->addr_type == AF_INET6) {
+		struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)sin;
+		sin6->sin6_family = AF_INET6;
+		memcpy((void *)&sin6->sin6_addr, cb->addr, 16);
+		sin6->sin6_port = cb->port;
+		if (cb->ip6_ndev_name[0] != 0) {
+			struct net_device *ndev;
+
+			ndev = __dev_get_by_name(&init_net, cb->ip6_ndev_name);
+			if (ndev != NULL) {
+				sin6->sin6_scope_id = ndev->ifindex;
+				dev_put(ndev);
+			}
+		}
+	}
+}
+
 static void krdma_run_server(struct krdma_cb *cb)
 {
     printk("run server \n");
     //.crate pd, mr.cq ,wait for info from client
     struct sockaddr_storage sin;
     int ret;
+
+    fill_sockaddr(&sin,cb);
 
     ret = rdma_bind_addr(cb->cm_id, (struct sockaddr *)&sin); //find ib_device & get src ip;
     if (ret) {
