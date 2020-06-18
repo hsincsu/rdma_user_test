@@ -27,6 +27,7 @@
 static int debug = 1;
 #define DEBUG_LOG if (debug) printk
 
+MODULE_VERSION("1.0.0.0");
 MODULE_AUTHOR("HS");
 MODULE_DESCRIPTION("KERNEL RDMA TEST");
 MODULE_LICENSE("Dual BSD/GPL");
@@ -108,6 +109,8 @@ struct krdma_cb{
         struct ib_mr *dma_mr;
         struct ib_mr *reg_mr;
 
+        int server_invalidate;
+	    int read_inv;
         u8 key;
 
         struct ib_recv_wr rq_wr;
