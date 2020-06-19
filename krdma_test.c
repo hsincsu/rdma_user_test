@@ -96,7 +96,7 @@ enum test_state {
 
 
 struct krdma_buf_info{
-        uint64_t buf;
+        uint64_t *buf;
         uint32_t rkey;
         uint32_t size;
 };
@@ -370,6 +370,8 @@ static void krdma_run_server(struct krdma_cb *cb)
     struct ib_mr *ibmr;
     struct ib_qp *ibqp;
     int ret;
+    uint64_t *bufaddr;
+
     printk("get cb's info: \n");
     u32 ipaddr;
      ipaddr = htonl(cb->addr);
@@ -432,7 +434,8 @@ static void krdma_run_server(struct krdma_cb *cb)
     }
     cb->qp = ibqp;
 
-    cb->send_buf.buf    = kzalloc(16,GFP_KERNEL);
+    bufaddr             = kzalloc(16,GFP_KERNEL);
+    cb->send_buf.buf    = bufaddr;
     cb->send_buf.size   = 16;
     cb->rdma_mr         = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
     if(IS_ERR(cb->rdma_mr)){
@@ -471,6 +474,16 @@ static void krdma_run_server(struct krdma_cb *cb)
     int qp_attr_mask = IB_QP_STATE | IB_QP_PKEY_INDEX |IB_QP_PORT |IB_QP_ACCESS_FLAGS;
     #endif
 
+error4:
+    kfree(bufaddr);
+error3:
+    ib_dereg_mr(cb->rdma_mr);
+error2:
+    ib_dealloc_qp(ibqp);
+error1:
+    ib_dealloc_cq(ibcq);
+error0:
+    ib_dealloc_pd(ibpd);
 
 
 
@@ -490,6 +503,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     struct ib_mr *ibmr;
     struct ib_qp *ibqp;
     int ret;
+    uint64_t *bufaddr;
 
     fill_sockaddr(&sin,cb);
 
@@ -546,7 +560,8 @@ static void krdma_run_client(struct krdma_cb *cb)
     }
     cb->qp = ibqp;
 
-    cb->send_buf.buf = kzalloc(16,GFP_KERNEL);
+    bufaddr = kzalloc(16,GFP_KERNEL);
+    cb->send_buf.buf = bufaddr;
     cb->send_buf.size = 16;
     cb->rdma_mr  = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
     if(IS_ERR(cb->rdma_mr)){
@@ -577,6 +592,16 @@ static void krdma_run_client(struct krdma_cb *cb)
     printk("start to modify qp \n");
 
 
+error4:
+    kfree(bufaddr);
+error3:
+    ib_dereg_mr(cb->rdma_mr);
+error2:
+    ib_dealloc_qp(ibqp);
+error1:
+    ib_dealloc_cq(ibcq);
+error0:
+    ib_dealloc_pd(ibpd);
 
 
 
