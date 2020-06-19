@@ -28,6 +28,7 @@
 
 static int debug = 1;
 #define DEBUG_LOG if (debug) printk
+#define BUFFER_SIZE 1024
 
 MODULE_VERSION("1.0.0.0");
 MODULE_AUTHOR("HS");
