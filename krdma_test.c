@@ -178,7 +178,7 @@ int start_my_server(struct krdma_cb *cb){
 
     memset(&s_addr,0,sizeof(s_addr));
     s_addr.sin_family=AF_INET;
-    s_addr.sin_port  =htons(port);
+    s_addr.sin_port  =port;
     s_addr.sin_addr.s_addr = htonl(cb->addr); // bind the card addr.
 
     sock = (struct socket *)kmalloc(sizeof(struct socket),GFP_KERNEL);
@@ -269,7 +269,7 @@ int start_my_client(struct krdma_cb *cb){
     }
     memset(&s_addr, 0, sizeof(s_addr));
     s_addr.sin_family = AF_INET;
-    s_addr.sin_port = htons(port_num);
+    s_addr.sin_port = port_num;
     s_addr.sin_addr.s_addr = htonl(cb->addr);
     sock = (struct socket *)kmalloc(sizeof(struct socket), GFP_KERNEL);
     
@@ -375,9 +375,10 @@ static void krdma_run_server(struct krdma_cb *cb)
 
     printk("get cb's info: \n");
     u32 ipaddr;
-     ipaddr = htonl(cb->addr);
+    ipaddr = cb->addr[3]| cb->addr[2]| cb->addr[1]| cb->addr[0];
+    printk("addrstr: %s \n",cb->addr_str);
     printk("ipaddr: 0x%x \n",ipaddr);
-    printk("port:   0x%x \n",cb->port);
+    printk("port:   %d \n",cb->port);
 
     fill_sockaddr(&sin,cb);
 
@@ -506,6 +507,13 @@ static void krdma_run_client(struct krdma_cb *cb)
     int ret;
     uint64_t *bufaddr;
 
+    printk("get cb's info: \n");
+    u32 ipaddr;
+    ipaddr = cb->addr[3]| cb->addr[2]| cb->addr[1]| cb->addr[0];
+    printk("addrstr: %s \n",cb->addr_str);
+    printk("ipaddr: 0x%x \n",ipaddr);
+    printk("port:   %d \n",cb->port);
+    
     fill_sockaddr(&sin,cb);
 
     ret = rdma_bind_addr(cb->cm_id, (struct sockaddr *)&sin); //find ib_device & get src ip;
