@@ -479,9 +479,9 @@ error4:
 error3:
     ib_dereg_mr(cb->rdma_mr);
 error2:
-    ib_dealloc_qp(ibqp);
+    ib_destroy_qp(ibqp);
 error1:
-    ib_dealloc_cq(ibcq);
+    ib_destroy_cq(ibcq);
 error0:
     ib_dealloc_pd(ibpd);
 
@@ -597,13 +597,13 @@ error4:
 error3:
     ib_dereg_mr(cb->rdma_mr);
 error2:
-    ib_dealloc_qp(ibqp);
+    ib_destroy_qp(ibqp);
 error1:
-    ib_dealloc_cq(ibcq);
+    ib_destroy_cq(ibcq);
 error0:
     ib_dealloc_pd(ibpd);
 
-
+    return ;
 
 }
 
