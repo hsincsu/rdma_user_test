@@ -56,6 +56,7 @@ static const struct krdma_option krdma_opts[] = {
  	{"local_dma_lkey", OPT_NOPARAM, 'Z'},
  	{"read_inv", OPT_NOPARAM, 'R'},
  	{"fr", OPT_NOPARAM, 'f'},
+    {"destaddr",OPT_STRING,'D'},
 	{NULL, 0, 0}
 };
 
@@ -142,8 +143,14 @@ struct krdma_cb{
 
         uint16_t port;
         u8 addr[16];
+        u8 destaddr[16];
         char *addr_str;
         uint8_t addr_type;
+
+        char *destaddr_str;
+        uint8_t destaddr_type;
+
+
         int verbose;
         int count;
         int size;
@@ -270,7 +277,7 @@ int start_my_client(struct krdma_cb *cb){
     memset(&s_addr, 0, sizeof(s_addr));
     s_addr.sin_family = AF_INET;
     s_addr.sin_port = port_num;
-    s_addr.sin_addr.s_addr = in_aton(cb->addr_str);
+    s_addr.sin_addr.s_addr = in_aton(cb->destaddr_str);
     sock = (struct socket *)kmalloc(sizeof(struct socket), GFP_KERNEL);
     
     ret = sock_create_kern(&init_net, AF_INET, SOCK_STREAM, IPPROTO_TCP, &sock);
@@ -705,6 +712,11 @@ int krdma_doit(char *cmd)
              case 'd':
                 cb->duplex++;
                 break;
+             case 'D':
+                cb->destaddr_str = optarg;
+                in4_pton(optarg, -1, cb->destaddr, -1 ,NULL);
+                cb->destaddr_type = AF_INET;
+                DEBUG_LOG("ipaddr %s \n",optarg);
              case 'I':
 			    cb->server_invalidate = 1;
 			    break;
