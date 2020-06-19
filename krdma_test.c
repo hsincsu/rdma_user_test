@@ -2,6 +2,8 @@
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
+#include<linux/socket.h>
+#include<net/sock.h>
 #include <linux/slab.h>
 #include <linux/err.h>
 #include <linux/string.h>
@@ -123,7 +125,7 @@ struct krdma_cb{
         struct ib_sge send_sg1;
         struct krdma_buf_info send_buf __aligned(16);
         u64 send_dma_addr;
-        struct ib_mr *rdma_mr;
+        struct ib_mr *rdma_mr; // for send mr.
 
         uint32_t remote_rkey;
         uint64_t remote_addr;
@@ -163,6 +165,156 @@ struct krdma_cb{
         struct list_head list;
 
 };
+
+int start_my_server(struct krdma_cb *cb){
+    struct socket *sock, *client_sock;
+    struct sockaddr_in s_addr;
+    unsigned short port = 0;
+
+    int ret = 0;
+
+    port = cb->port;
+
+    memset(&s_addr,0,sizeof(s_addr));
+    s_addr.sin_family=AF_INET;
+    s_addr.sin_port  =htons(port);
+    s_addr.sin_addr.s_addr = htonl(cb->addr); // bind the card addr.
+
+    sock = (struct socket *)kmalloc(sizeof(struct socket),GFP_KERNEL);
+    client_sock = (struct socket *)kmalloc(sizeof(struct socket),GFP_KERNEL);
+
+    ret = sock_create_kern(&init_net,AF_INET, SOCK_STREAM, 0, &sock);
+    if(ret){
+            printk("server: socket create error \n");
+    }
+    printk("server: socket create ok \n");
+
+    ret = sock->ops->bind(sock,(struct sockaddr *)&s_addr, sizeof(struct sockaddr_in));
+    if(ret < 0){
+            printk("server: bind error\n");
+            return ret;
+    }
+    printk("server: bind ok\n");
+
+    ret = sock->ops->listen(sock,10);
+    if(ret< 0){
+            printk("server: listen error \n");
+            return ret;
+    }
+    printk("server: listen ok \n");
+
+    ret = kernel_accept(sock,&client_sock,10);
+    if(ret < 0){
+            printk("server: accept error\n");
+            return ret;
+    }
+    printk("server: accept, connection established\n");
+
+    char *recvbuf = NULL;
+    recvbuf = kmalloc(1024,GFP_KERNEL);
+    if(recvbuf == NULL)
+    {
+        printk("server: recvbuf kmalloc failed \n");
+        return -1;
+    }
+    memset(recvbuf,0,1024);
+
+    struct kvec vec;
+    struct msghdr msg;
+    memset(&vec,0,sizeof(vec));
+	memset(&msg,0,sizeof(msg));
+
+    vec.iov_base = recvbuf;
+    vec.iov_len  = 1024;
+    msg.msg_flags= MSG_NOSIGNAL;
+    msleep(1000);
+   
+    ret=kernel_recvmsg(client_sock,&msg,&vec,1,1024, msg.msg_flags); /*receive message*/  
+    recvbuf[1023] = 0;
+    printk("receive message:\n %s\n",recvbuf);
+
+    printk("release socket now\n");
+    sock_release(client_sock);
+    sock_release(sock);
+
+    return ret;
+
+}
+
+int start_my_client(struct krdma_cb *cb){
+    struct socket *sock;
+    struct sockaddr_in s_addr;
+    unsigned short port_num = 0;
+    int ret = 0;
+    char *send_buf = NULL;
+    char *recv_buf = NULL;
+    struct kvec send_vec, recv_vec;
+    struct msghdr send_msg, recv_msg;
+
+
+    port_num = cb->port;
+
+    /* kmalloc a send buffer*/
+    send_buf = kmalloc(BUFFER_SIZE, GFP_KERNEL);
+    if (send_buf == NULL) {
+        printk("client: send_buf kmalloc error!\n");
+        return -1;
+    }
+    /* kmalloc a receive buffer*/
+    recv_buf = kmalloc(BUFFER_SIZE, GFP_KERNEL);
+    if(recv_buf == NULL){
+        printk("client: recv_buf kmalloc error!\n");
+        return -1;
+    }
+    memset(&s_addr, 0, sizeof(s_addr));
+    s_addr.sin_family = AF_INET;
+    s_addr.sin_port = htons(port_num);
+    s_addr.sin_addr.s_addr = htonl(cb->addr);
+    sock = (struct socket *)kmalloc(sizeof(struct socket), GFP_KERNEL);
+    
+    ret = sock_create_kern(&init_net, AF_INET, SOCK_STREAM, IPPROTO_TCP, &sock);
+    if (ret < 0) {
+        printk("client:socket create error!\n");
+        return ret;
+    }
+    printk("client: socket create ok!\n");
+  
+    ret = sock->ops->connect(sock, (struct sockaddr *)&s_addr, sizeof(s_addr), 0);
+    if (ret != 0) {
+        printk("client: connect error!\n");
+        return ret;
+    }
+    printk("client: connect ok!\n");
+    memset(send_buf, 'a', BUFFER_SIZE);
+    memset(&send_msg, 0, sizeof(send_msg));
+    memset(&send_vec, 0, sizeof(send_vec));
+    send_vec.iov_base = send_buf;
+    send_vec.iov_len = BUFFER_SIZE;
+    // 发送数据
+    ret = kernel_sendmsg(sock, &send_msg, &send_vec, 1, BUFFER_SIZE);
+    if (ret < 0) {
+        printk("client: kernel_sendmsg error!\n");
+        return ret;
+    } else if(ret != BUFFER_SIZE){
+        printk("client: ret!=BUFFER_SIZE");
+    }
+    printk("client: send ok!\n");
+    memset(recv_buf, 0, BUFFER_SIZE);
+    memset(&recv_vec, 0, sizeof(recv_vec));
+    memset(&recv_msg, 0, sizeof(recv_msg));
+    recv_vec.iov_base = recv_buf;
+    recv_vec.iov_len = BUFFER_SIZE;
+    // 接收数据
+    ret = kernel_recvmsg(sock, &recv_msg, &recv_vec, 1, BUFFER_SIZE, 0);
+    printk("client: received message:\n %s\n", recv_buf);
+    // 关闭连接
+    kernel_sock_shutdown(sock, SHUT_RDWR);
+    sock_release(sock);
+    return 0;
+}
+
+
+
 
 static int reg_supported(struct ib_device *dev)
 {
@@ -212,6 +364,131 @@ static void krdma_run_server(struct krdma_cb *cb)
     printk("run server \n");
     //.crate pd, mr.cq ,wait for info from client
     struct sockaddr_storage sin;
+    struct ib_device *ibdev;
+    struct ib_pd *ibpd;
+    struct ib_cq *ibcq;
+    struct ib_mr *ibmr;
+    struct ib_qp *ibqp;
+    int ret;
+    printk("get cb's info: \n");
+    u32 ipaddr;
+     ipaddr = htonl(cb->addr);
+    printk("ipaddr: 0x%x \n",ipaddr);
+    printk("port:   0x%x \n",cb->port);
+
+    fill_sockaddr(&sin,cb);
+
+    ret = rdma_bind_addr(cb->cm_id, (struct sockaddr *)&sin); //find ib_device & get src ip;
+    if (ret) {
+		printk("rdma_bind_addr error %d\n", ret);
+		return ret;
+	}
+    DEBUG_LOG("rdma_bind_addr successful\n");
+
+    if(!reg_supported(cb->cm_id->device))
+            printk("not support\n");
+
+
+    ibdev = cb->cm_id->device;
+
+    //before socket, create some res.
+    ibpd = ib_alloc_pd(ibdev,0);
+    if(IS_ERR(ibpd)){
+            printk("pd wrong\n");
+            ret = PTR_ERR(ibpd);
+            goto error0;
+    }
+    cb->pd = ibpd;
+
+    struct ib_cq_init_attr cqattr;
+    cqattr.cqe = 10;
+    cqattr.flags = 0;
+    cqattr.comp_vector = 1;
+
+    ibcq = ib_create_cq(ibdev,NULL,NULL,NULL,&cqattr);
+    if(IS_ERR(ibcq)){
+            printk("cq wrong \n");
+            ret = PTR_ERR(ibcq);
+            goto error1;
+    }
+    cb->cq = ibcq;
+
+    struct ib_qp_init_attr *qp_attr;
+    qp_attr = kzalloc(sizeof(*qp_attr),GFP_KERNEL);
+    qp_attr->send_cq = ibcq;
+    qp_attr->recv_cq = ibcq;
+    qp_attr->cap.max_send_wr = 10;
+    qp_attr->cap.max_recv_wr = 10;
+    qp_attr->cap.max_send_sge = 1;
+    qp_attr->cap.max_recv_sge = 1;
+
+    qp_attr->qp_type = IB_QPT_RC;
+
+    ibqp = ib_create_qp(ibpd,qp_attr);
+    if (IS_ERR(ibqp)) {
+                printk("biqp wrong..\n");//added by hs
+                ret = PTR_ERR(ibqp);
+                goto error2;
+    }
+    cb->qp = ibqp;
+
+    cb->send_buf.buf    = kzalloc(16,GFP_KERNEL);
+    cb->send_buf.size   = 16;
+    cb->rdma_mr         = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
+    if(IS_ERR(cb->rdma_mr)){
+            printk("rdma mr wrong \n");
+            ret = PTR_ERR(cb->rdma_mr);
+            goto error3;
+    }
+
+    cb->rdma_mr->device     = ibpd->device;
+    cb->rdma_mr->pd         = ibpd;
+    cb->rdma_mr->uobject    = NULL;
+    atomic_inc(&ibpd->usecnt);
+    cb->rdma_mr->need_inval = false;
+    cb->send_buf.rkey       = cb->rdma_mr->rkey; // get rkey
+
+    cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
+    if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
+    {
+            printk("mapping error \n");
+            goto error4;
+    }
+    printk("create rs success end \n");
+    printk("start to exchange info with client \n");
+    //start_my_server();
+
+
+    printk("start to modify qp \n");
+    #if 0
+    struct ib_qp_attr attr;
+    attr.qp_state = IB_QPS_INIT;
+    attr.pkey_index = 0x0;
+//  attr.qkey = 0x0;
+    attr.port_num = 1;
+    attr.qp_access_flags =IB_ACCESS_REMOTE_WRITE | IB_ACCESS_REMOTE_READ |
+                            IB_ACCESS_LOCAL_WRITE | IB_ACCESS_REMOTE_ATOMIC;
+    int qp_attr_mask = IB_QP_STATE | IB_QP_PKEY_INDEX |IB_QP_PORT |IB_QP_ACCESS_FLAGS;
+    #endif
+
+
+
+
+
+    return ;
+}
+
+
+static void krdma_run_client(struct krdma_cb *cb)
+{
+    printk("run client \n");
+    //.crate pd, mr.cq ,exchange with server
+    struct sockaddr_storage sin;
+    struct ib_device *ibdev;
+    struct ib_pd *ibpd;
+    struct ib_cq *ibcq;
+    struct ib_mr *ibmr;
+    struct ib_qp *ibqp;
     int ret;
 
     fill_sockaddr(&sin,cb);
@@ -224,15 +501,85 @@ static void krdma_run_server(struct krdma_cb *cb)
     DEBUG_LOG("rdma_bind_addr successful\n");
 
     if(!reg_supported(cb->cm_id->device))
-            return -EINVAL;
-
-    return ;
-}
+            printk("not support\n");
 
 
-static void krdma_run_client(struct krdma_cb *cb)
-{
-    printk("run client \n");
+    ibdev = cb->cm_id->device;
+
+    ibpd = ib_alloc_pd(ibdev,0);
+    if(IS_ERR(ibpd)){
+            printk("pd wrong\n");
+            ret = PTR_ERR(ibpd);
+            goto error0;
+    }
+    cb->pd = ibpd;
+
+    struct ib_cq_init_attr cqattr;
+    cqattr.cqe = 10;
+    cqattr.flags = 0;
+    cqattr.comp_vector = 1;
+
+    ibcq = ib_create_cq(ibdev,NULL,NULL,NULL,&cqattr);
+    if(IS_ERR(ibcq)){
+            printk("cq wrong \n");
+            ret = PTR_ERR(ibcq);
+            goto error1;
+    }
+    cb->cq = ibcq;
+
+    struct ib_qp_init_attr *qp_attr;
+    qp_attr = kzalloc(sizeof(*qp_attr),GFP_KERNEL);
+    qp_attr->send_cq = ibcq;
+    qp_attr->recv_cq = ibcq;
+    qp_attr->cap.max_send_wr = 10;
+    qp_attr->cap.max_recv_wr = 10;
+    qp_attr->cap.max_send_sge = 1;
+    qp_attr->cap.max_recv_sge = 1;
+
+    qp_attr->qp_type = IB_QPT_RC;
+
+    ibqp = ib_create_qp(ibpd,qp_attr);
+    if (IS_ERR(ibqp)) {
+                printk("biqp wrong..\n");//added by hs
+                ret = PTR_ERR(ibqp);
+                goto error2;
+    }
+    cb->qp = ibqp;
+
+    cb->send_buf.buf = kzalloc(16,GFP_KERNEL);
+    cb->send_buf.size = 16;
+    cb->rdma_mr  = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
+    if(IS_ERR(cb->rdma_mr)){
+            printk("rdma mr wrong \n");
+            ret = PTR_ERR(cb->rdma_mr);
+            goto error3;
+    }
+
+    cb->rdma_mr->device     = ibpd->device;
+    cb->rdma_mr->pd         = ibpd;
+    cb->rdma_mr->uobject    = NULL;
+    atomic_inc(&ibpd->usecnt);
+    cb->rdma_mr->need_inval = false;
+    cb->send_buf.rkey       = cb->rdma_mr->rkey; // get rkey
+
+    cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
+    if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
+    {
+            printk("mapping error \n");
+            goto error4;
+    }
+    printk("create rs success end \n");
+
+    printk("start to exchange info with server \n");
+    //start_my_client();
+
+
+    printk("start to modify qp \n");
+
+
+
+
+
 }
 
 int krdma_doit(char *cmd)
