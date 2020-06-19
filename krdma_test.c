@@ -179,7 +179,7 @@ int start_my_server(struct krdma_cb *cb){
     memset(&s_addr,0,sizeof(s_addr));
     s_addr.sin_family=AF_INET;
     s_addr.sin_port  =port;
-    s_addr.sin_addr.s_addr = in_aton(*cb->addr_str); // bind the card addr.
+    s_addr.sin_addr.s_addr = in_aton(cb->addr_str); // bind the card addr.
 
     sock = (struct socket *)kmalloc(sizeof(struct socket),GFP_KERNEL);
     client_sock = (struct socket *)kmalloc(sizeof(struct socket),GFP_KERNEL);
@@ -270,7 +270,7 @@ int start_my_client(struct krdma_cb *cb){
     memset(&s_addr, 0, sizeof(s_addr));
     s_addr.sin_family = AF_INET;
     s_addr.sin_port = port_num;
-    s_addr.sin_addr.s_addr = in_aton(*cb->addr_str);
+    s_addr.sin_addr.s_addr = in_aton(cb->addr_str);
     sock = (struct socket *)kmalloc(sizeof(struct socket), GFP_KERNEL);
     
     ret = sock_create_kern(&init_net, AF_INET, SOCK_STREAM, IPPROTO_TCP, &sock);
