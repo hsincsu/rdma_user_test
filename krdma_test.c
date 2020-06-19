@@ -375,7 +375,7 @@ static void krdma_run_server(struct krdma_cb *cb)
 
     printk("get cb's info: \n");
     u32 ipaddr;
-    ipaddr = cb->addr[3]| cb->addr[2]| cb->addr[1]| cb->addr[0];
+    ipaddr = (cb->addr[3] << 24) | (cb->addr[2] << 16) | (cb->addr[1] << 8) | cb->addr[0];
     printk("addrstr: %s \n",cb->addr_str);
     printk("ipaddr: 0x%x \n",ipaddr);
     printk("port:   %d \n",cb->port);
