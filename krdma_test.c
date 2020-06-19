@@ -661,6 +661,10 @@ int krdma_doit(char *cmd)
                  cb->server = 1;
                 DEBUG_LOG("server\n");
                 break;
+             case 'c':
+                 cb->server = 0;
+                 DEBUG_LOG("client\n");
+                 break;
              case 'S':
                  cb->size = optint;
                  if((cb->size < 1 || cb->size > 60)){
