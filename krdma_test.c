@@ -461,7 +461,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     }
     printk("create rs success end \n");
     printk("start to exchange info with client \n");
-    //start_my_server();
+    start_my_server();
 
 
     printk("start to modify qp \n");
@@ -595,7 +595,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     printk("create rs success end \n");
 
     printk("start to exchange info with server \n");
-    //start_my_client();
+    start_my_client();
 
 
     printk("start to modify qp \n");
