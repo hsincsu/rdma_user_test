@@ -76,6 +76,23 @@ struct krdma_stats {
 #define htonll(x) cpu_to_be64((x))
 #define ntohll(x) cpu_to_be64((x))
 
+//for change info between client / server.
+#define EXCHANGE_QPINFO 0x100;
+#define EXCHANGE_ADDRINFO 0x101;
+
+struct qp_info{
+    uint32_t qpn;
+    uint32_t qkey;
+    uint32_t pkey;
+};
+
+struct addr_info{
+    uint64_t remote_addr;
+    uint64_t size;
+    uint64_t rkey;
+}
+//end
+
 static DEFINE_MUTEX(krdma_mutex);
 
 static LIST_HEAD(krdma_cbs);
@@ -94,6 +111,8 @@ enum test_state {
 	RDMA_WRITE_COMPLETE,
 	ERROR
 };
+
+
 
 
 
@@ -174,7 +193,7 @@ struct krdma_cb{
 
 };
 
-int start_my_server(struct krdma_cb *cb){
+int start_my_server(struct krdma_cb *cb, char *send_buf,int sendsize, char *recv_buf,int recvsize){
     struct socket *sock, *client_sock;
     struct sockaddr_in s_addr;
     unsigned short port = 0;
@@ -218,6 +237,7 @@ int start_my_server(struct krdma_cb *cb){
     }
     printk("server: accept, connection established\n");
 
+#if 0
     char *recvbuf = NULL;
     recvbuf = kmalloc(1024,GFP_KERNEL);
     if(recvbuf == NULL)
@@ -226,20 +246,38 @@ int start_my_server(struct krdma_cb *cb){
         return -1;
     }
     memset(recvbuf,0,1024);
+#endif
+
 
     struct kvec vec;
     struct msghdr msg;
     memset(&vec,0,sizeof(vec));
 	memset(&msg,0,sizeof(msg));
 
-    vec.iov_base = recvbuf;
-    vec.iov_len  = 1024;
+    vec.iov_base = recv_buf;
+    vec.iov_len  = recvsize;
     msg.msg_flags= MSG_NOSIGNAL;
     msleep(1000);
    
-    ret=kernel_recvmsg(client_sock,&msg,&vec,1,1024, msg.msg_flags); /*receive message*/  
-    recvbuf[1023] = 0;
-    printk("receive message:\n %s\n",recvbuf);
+    ret=kernel_recvmsg(client_sock,&msg,&vec,1,recvsize, msg.msg_flags); /*receive message*/  
+
+    struct kvec send_vec;
+    struct msghdr send_msg;
+    memset(&send_msg, 0, sizeof(send_msg));
+    memset(&send_vec, 0, sizeof(send_vec));
+
+    send_vec.iov_base = send_buf;
+    send_vec.iov_len = sendsize;
+
+    // 发送数据
+    ret = kernel_sendmsg(client_sock, &send_msg, &send_vec, 1, sendsize);
+    if (ret < 0) {
+        printk("client: kernel_sendmsg error!\n");
+        return ret;
+    } else if(ret != sendsize){
+        printk("client: ret!=%d",sizeof(*send_buf));
+    }
+
 
     printk("release socket now\n");
     sock_release(client_sock);
@@ -249,7 +287,7 @@ int start_my_server(struct krdma_cb *cb){
 
 }
 
-int start_my_client(struct krdma_cb *cb){
+int start_my_client(struct krdma_cb *cb,char *send_buf,int sendsize char *recv_buf,int recvsize){
     struct socket *sock;
     struct sockaddr_in s_addr;
     unsigned short port_num = 0;
@@ -262,6 +300,7 @@ int start_my_client(struct krdma_cb *cb){
 
     port_num = cb->port;
 
+#if 0
     /* kmalloc a send buffer*/
     send_buf = kmalloc(BUFFER_SIZE, GFP_KERNEL);
     if (send_buf == NULL) {
@@ -274,6 +313,8 @@ int start_my_client(struct krdma_cb *cb){
         printk("client: recv_buf kmalloc error!\n");
         return -1;
     }
+#endif
+
     memset(&s_addr, 0, sizeof(s_addr));
     s_addr.sin_family = AF_INET;
     s_addr.sin_port = port_num;
@@ -293,28 +334,33 @@ int start_my_client(struct krdma_cb *cb){
         return ret;
     }
     printk("client: connect ok!\n");
-    memset(send_buf, 'a', BUFFER_SIZE);
+
+
+
+    //memset(send_buf, 'a', BUFFER_SIZE);
     memset(&send_msg, 0, sizeof(send_msg));
     memset(&send_vec, 0, sizeof(send_vec));
     send_vec.iov_base = send_buf;
-    send_vec.iov_len = BUFFER_SIZE;
+    send_vec.iov_len = sendsize;
     // 发送数据
-    ret = kernel_sendmsg(sock, &send_msg, &send_vec, 1, BUFFER_SIZE);
+    ret = kernel_sendmsg(sock, &send_msg, &send_vec, 1, sendsize);
     if (ret < 0) {
         printk("client: kernel_sendmsg error!\n");
         return ret;
-    } else if(ret != BUFFER_SIZE){
-        printk("client: ret!=BUFFER_SIZE");
+    } else if(ret != sendsize){
+        printk("client: ret!=%d \n",sizeof(*send_buf));
     }
     printk("client: send ok!\n");
-    memset(recv_buf, 0, BUFFER_SIZE);
+
+
+    //memset(recv_buf, 0, BUFFER_SIZE);
     memset(&recv_vec, 0, sizeof(recv_vec));
     memset(&recv_msg, 0, sizeof(recv_msg));
     recv_vec.iov_base = recv_buf;
-    recv_vec.iov_len = BUFFER_SIZE;
+    recv_vec.iov_len = recvsize;
     // 接收数据
-    ret = kernel_recvmsg(sock, &recv_msg, &recv_vec, 1, BUFFER_SIZE, 0);
-    printk("client: received message:\n %s\n", recv_buf);
+    ret = kernel_recvmsg(sock, &recv_msg, &recv_vec, 1, recvsize, 0);
+    
     // 关闭连接
     kernel_sock_shutdown(sock, SHUT_RDWR);
     sock_release(sock);
@@ -467,8 +513,27 @@ static void krdma_run_server(struct krdma_cb *cb)
             goto error4;
     }
     printk("create rs success end \n");
-    printk("start to exchange info with client \n");
-    start_my_server(cb);
+    printk("start to exchange qpinfo with client \n");
+
+    struct qp_info *qpinfo = NULL;
+    struct qp_info *qpinfo_c = NULL;
+    int size = sizeof(*qpinfo);
+    qpinfo_c = kmalloc(sizeof(*qpinfo_c),GFP_KERNEL);
+    qpinfo = kmalloc(sizeof(*qpinfo),GFP_KERNEL);
+    memset(qpinfo,0,sizeof(*qpinfo));
+    memset(qpinfo_c,0,sizeof(*qpinfo_c));
+
+    qpinfo->qpn = ibqp->qp_num;
+    qpinfo->qkey = 0;
+    qpinfo->pkey = 0;
+
+    start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
+
+    printk("client's qpinfo : \n");
+    printk("client: qpn:0x %d \n",qpinfo_c->qpn);
+    printk("client: qkey:0x %d \n",qpinfo_c->qkey);
+    printk("client: pkey: 0x %d \n",qpinfo_c->pkey);
+
 
 
     printk("start to modify qp \n");
@@ -602,8 +667,25 @@ static void krdma_run_client(struct krdma_cb *cb)
     printk("create rs success end \n");
 
     printk("start to exchange info with server \n");
-    start_my_client(cb);
 
+    struct qp_info *qpinfo = NULL;
+    struct qp_info *qpinfo_s = NULL;
+    int size = sizeof(*qpinfo);
+    qpinfo_s = kmalloc(sizeof(*qpinfo_s),GFP_KERNEL);
+    qpinfo = kmalloc(sizeof(*qpinfo),GFP_KERNEL);
+    memset(qpinfo,0,sizeof(*qpinfo));
+    memset(qpinfo_s,0,sizeof(*qpinfo_s));
+
+    qpinfo->qpn = ibqp->qp_num;
+    qpinfo->qkey = 0;
+    qpinfo->pkey = 0;
+
+    start_my_client(cb,(char *)qpinfo,size,(char *)qpinfo_s,size);
+
+     printk("server's qpinfo : \n");
+    printk("server: qpn:0x %d \n",qpinfo_s->qpn);
+    printk("server: qkey:0x %d \n",qpinfo_s->qkey);
+    printk("server: pkey: 0x %d \n",qpinfo_s->pkey);
 
     printk("start to modify qp \n");
 
