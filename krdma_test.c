@@ -193,7 +193,8 @@ struct krdma_cb{
 
 };
 
-int start_my_server(struct krdma_cb *cb, char *send_buf,int sendsize, char *recv_buf,int recvsize){
+int start_my_server(struct krdma_cb *cb, char *send_buf,int sendsize, char *recv_buf,int recvsize)
+{
     struct socket *sock, *client_sock;
     struct sockaddr_in s_addr;
     unsigned short port = 0;
@@ -287,7 +288,8 @@ int start_my_server(struct krdma_cb *cb, char *send_buf,int sendsize, char *recv
 
 }
 
-int start_my_client(struct krdma_cb *cb,char *send_buf,int sendsize char *recv_buf,int recvsize){
+int start_my_client(struct krdma_cb *cb,char *send_buf,int sendsize ,char *recv_buf,int recvsize)
+{
     struct socket *sock;
     struct sockaddr_in s_addr;
     unsigned short port_num = 0;
