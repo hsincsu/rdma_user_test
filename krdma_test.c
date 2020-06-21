@@ -90,7 +90,7 @@ struct addr_info{
     uint64_t remote_addr;
     uint64_t size;
     uint64_t rkey;
-}
+};
 //end
 
 static DEFINE_MUTEX(krdma_mutex);
@@ -198,7 +198,6 @@ int start_my_server(struct krdma_cb *cb, char *send_buf,int sendsize, char *recv
     struct socket *sock, *client_sock;
     struct sockaddr_in s_addr;
     unsigned short port = 0;
-
     int ret = 0;
 
     port = cb->port;
@@ -294,8 +293,8 @@ int start_my_client(struct krdma_cb *cb,char *send_buf,int sendsize ,char *recv_
     struct sockaddr_in s_addr;
     unsigned short port_num = 0;
     int ret = 0;
-    char *send_buf = NULL;
-    char *recv_buf = NULL;
+   // char *send_buf = NULL;
+   // char *recv_buf = NULL;
     struct kvec send_vec, recv_vec;
     struct msghdr send_msg, recv_msg;
 
