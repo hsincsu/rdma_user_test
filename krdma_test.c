@@ -535,6 +535,57 @@ static void krdma_run_server(struct krdma_cb *cb)
     printk("client: qkey:0x %d \n",qpinfo_c->qkey);
     printk("client: pkey: 0x %d \n",qpinfo_c->pkey);
 
+    printk("\t modify_qp start\n");
+    struct ib_qp_attr attr;
+    attr.qp_state = IB_QPS_INIT;
+    attr.pkey_index = 0x0;
+//      attr.qkey = 0x0;
+    attr.port_num = 1;
+    attr.qp_access_flags =IB_ACCESS_REMOTE_WRITE | IB_ACCESS_REMOTE_READ |
+                              IB_ACCESS_LOCAL_WRITE | IB_ACCESS_REMOTE_ATOMIC;
+        int qp_attr_mask = IB_QP_STATE | IB_QP_PKEY_INDEX |IB_QP_PORT |IB_QP_ACCESS_FLAGS;
+
+    ret = ib_modify_qp(ibqp,&attr,IB_QP_STATE | IB_QP_PKEY_INDEX |IB_QP_PORT |IB_QP_ACCESS_FLAGS);
+    if(ret == 0)
+    printk(" modify qp to INIT success. \n");//added by hs
+    else 
+        {printk("modify qp failed \n");goto error4;}
+
+    union ib_gid gid;
+    ret = rdma_query_gid(ibdev,0,2,&gid);
+    if(ret ==0)
+    {printk("find gid success\n");}
+    else
+    {
+        printk("gid cannot find \n");
+    }
+
+    memset(&attr,0,sizeof(attr));
+    attr.qp_state               = IB_QPS_RTR;
+    attr.path_mtu               = IB_MTU_1024;
+    attr.dest_qp_num            = qpinfo_c->qpn;
+    attr.rq_psn                 = 0;
+    attr.max_dest_rd_atomic     = 1;
+    attr.min_rnr_timer          = 12;
+    attr.ah_attr.type           = RDMA_AH_ATTR_TYPE_ROCE;
+    attr.ah_attr.sl             = 0;
+    attr.ah_attr.port_num       = 1;
+    attr.ah_attr.ah_flags       = IB_AH_GRH;
+    attr.ah_attr.grh.dgid       = gid;
+    attr.ah_attr.grh.hop_limit  = 1;
+    attr.ah_attr.grh.sgid_index = 0;
+
+  int qp_attr_mask2 = IB_QP_STATE|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
+
+    //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
+
+    ret = ib_modify_qp(ibqp,&attr,qp_attr_mask2);
+    if(ret == 0)
+        printk("modify qp to rtr success \n");
+    else 
+        {printk("modify qp rtr failed \n"); goto error4;}
+
+
 
 
     printk("start to modify qp \n");
