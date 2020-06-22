@@ -23,6 +23,7 @@
 #include <asm/pci.h>
 
 #include <rdma/ib_verbs.h>
+#include <rdma/ib_cache.h>
 #include <rdma/rdma_cm.h>
 #include "getopt.h"
 
