@@ -642,7 +642,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     }
 
     memcpy(&qpinfo->gid,&gid,sizeof(union ib_gid));
-    qpinfo->addr.remote_addr = cb->send_buf.buf;
+    qpinfo->addr.remote_addr = cb->send_dma_addr;
     qpinfo->addr.size        = cb->send_buf.size;
     qpinfo->addr.rkey        = cb->send_buf.rkey;
     start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
@@ -940,7 +940,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     }
 
     memcpy(&qpinfo->gid,&gid,sizeof(union ib_gid));
-    qpinfo->addr.remote_addr = cb->send_buf.buf;
+    qpinfo->addr.remote_addr = cb->send_dma_addr;
     qpinfo->addr.size        = cb->send_buf.size;
     qpinfo->addr.rkey        = cb->send_buf.rkey;
     start_my_client(cb,(char *)qpinfo,size,(char *)qpinfo_s,size);
@@ -1017,7 +1017,7 @@ static void krdma_run_client(struct krdma_cb *cb)
 
     printk("dwcclient:Setting sg... \n");//added by hs
     memset(&sg1,0,sizeof(sg1));
-    sg1.addr =(uintptr_t)cb->send_buf.buf;
+    sg1.addr =(uintptr_t)cb->send_dma_addr;
     sg1.length = cb->send_buf.size;
     sg1.lkey = cb->send_buf.lkey;
 
