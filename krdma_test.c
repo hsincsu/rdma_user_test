@@ -85,6 +85,7 @@ struct qp_info{
     uint32_t qpn;
     uint32_t qkey;
     uint32_t pkey;
+    struct ib_gid remote_gid;
 };
 
 struct addr_info{
@@ -554,7 +555,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     qpinfo->qkey = 0;
     qpinfo->pkey = 0;
 
-   // start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
+   start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
 
 
 	qpinfo_c->qpn =4;
@@ -617,14 +618,18 @@ static void krdma_run_server(struct krdma_cb *cb)
     //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
 
     ib_resolve_eth_dmac(ibdev,&attr, &qp_attr_mask2);
+    int i =0;
+    printk("dmac:");
+    for(i = 0 ;i< 6; i++)
+    {
+        printk("%x",attr.ah_attr.roce.dmac[i]);
+    }
+
     ret = ib_modify_qp(ibqp,&attr,qp_attr_mask2);
     if(ret == 0)
         printk("modify qp to rtr success \n");
     else 
         {printk("modify qp rtr failed \n"); goto error4;}
-
-
-
 
     printk("start to modify qp \n");
     #if 0
