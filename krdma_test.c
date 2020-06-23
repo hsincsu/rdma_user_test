@@ -890,7 +890,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     attr.ah_attr.grh.sgid_index = 0;
 
     memcpy(attr.ah_attr.roce.dmac,qpinfo_s->ahattr.roce.dmac,6);
-  int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
+    qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     ret = ib_modify_qp(ibqp,&attr,qp_attr_mask2);
     if(ret == 0)
