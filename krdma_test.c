@@ -85,7 +85,7 @@ struct qp_info{
     uint32_t qpn;
     uint32_t qkey;
     uint32_t pkey;
-    struct ib_gid remote_gid;
+    union ib_gid remote_gid;
 };
 
 struct addr_info{
