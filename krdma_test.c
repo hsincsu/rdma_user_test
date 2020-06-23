@@ -555,11 +555,20 @@ static void krdma_run_server(struct krdma_cb *cb)
     union ib_gid gid;
     ret = rdma_query_gid(ibdev,0,2,&gid);
     if(ret ==0)
-    {printk("find gid success\n");}
+    {printk("find gid success\n");
+    int i =0;
+    for(i = 0;i < 16; i++)
+    {
+        printk("%x",gid.raw[i]);
+        printk(":");
+    }
+    }
     else
     {
-        printk("gid cannot find \n");
+        printk("gid cannot find \n");goto error4;
+        
     }
+
 
     memset(&attr,0,sizeof(attr));
     attr.qp_state               = IB_QPS_RTR;
