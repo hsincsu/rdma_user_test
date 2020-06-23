@@ -625,7 +625,7 @@ static void krdma_run_server(struct krdma_cb *cb)
 //end
     memset(&gid,0,sizeof(gid));
     memset(&attr,0,sizeof(attr));
-    memcpy(&attr.ah_attr.grh.dgid,&qpinfo_c->ahattr.dgid,sizeof(union ib_gid));
+    memcpy(&attr.ah_attr.grh.dgid,&qpinfo_c->ahattr.grh.dgid,sizeof(union ib_gid));
 
     attr.qp_state               = IB_QPS_RTR;
     attr.path_mtu               = IB_MTU_1024;
@@ -860,7 +860,7 @@ static void krdma_run_client(struct krdma_cb *cb)
 //end
     memset(&gid,0,sizeof(gid));
     memset(&attr,0,sizeof(attr));
-    memcpy(&attr.ah_attr.grh.dgid,&qpinfo_s->ahattr.dgid,sizeof(union ib_gid));
+    memcpy(&attr.ah_attr.grh.dgid,&qpinfo_s->ahattr.grh.dgid,sizeof(union ib_gid));
 
     attr.qp_state               = IB_QPS_RTR;
     attr.path_mtu               = IB_MTU_1024;
