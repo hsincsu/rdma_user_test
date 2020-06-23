@@ -85,7 +85,7 @@ struct qp_info{
     uint32_t qpn;
     uint32_t qkey;
     uint32_t pkey;
-    union ib_gid remote_gid;
+    struct rdma_ah_attr ahattr;
 };
 
 struct addr_info{
@@ -555,15 +555,6 @@ static void krdma_run_server(struct krdma_cb *cb)
     qpinfo->qkey = 0;
     qpinfo->pkey = 0;
 
-   start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
-
-
-	qpinfo_c->qpn =4;
-    printk("client's qpinfo : \n");
-    printk("client: qpn:0x %d \n",qpinfo_c->qpn);
-    printk("client: qkey:0x %d \n",qpinfo_c->qkey);
-    printk("client: pkey: 0x %d \n",qpinfo_c->pkey);
-
     printk("\t modify_qp start\n");
     struct ib_qp_attr attr;
     attr.qp_state = IB_QPS_INIT;
@@ -580,10 +571,11 @@ static void krdma_run_server(struct krdma_cb *cb)
     else 
         {printk("modify qp failed \n");goto error4;}
 
+//for find mac 
     union ib_gid gid;
     ret = rdma_query_gid(ibdev,1,0,&gid);
     if(ret ==0)
-    {printk("find gid success\n");
+    {printk("find local gid success\n");
     int i =0;
     for(i = 0;i < 16; i++)
     {
@@ -597,7 +589,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         
     }
 
-
+//for find mac 
     memset(&attr,0,sizeof(attr));
     attr.qp_state               = IB_QPS_RTR;
     attr.path_mtu               = IB_MTU_1024;
@@ -618,6 +610,40 @@ static void krdma_run_server(struct krdma_cb *cb)
     //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
 
     ib_resolve_eth_dmac(ibdev,&attr, &qp_attr_mask2);
+    memcpy(qpinfo->ahattr,&attr.ah_attr,sizeof(struct rdma_ah_attr));
+
+    start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
+    printk("client's qpinfo : \n");
+    printk("client: qpn:0x %d \n",qpinfo_c->qpn);
+    printk("client: qkey:0x %d \n",qpinfo_c->qkey);
+    printk("client: pkey: 0x %d \n",qpinfo_c->pkey);
+    int i  = 0;
+    printk("remote dmac:");
+    for(i =0; i< 6; i++)
+    printk("%x",qpinfo_c->ahattr.roce.dmac[i]);
+
+//end
+    memset(&gid,0,sizeof(gid));
+    memset(&attr,0,sizeof(attr));
+    memcpy(&attr.ah_attr.grh.dgid,&qpinfo_c->ahattr.dgid,sizeof(union ib_gid));
+
+    attr.qp_state               = IB_QPS_RTR;
+    attr.path_mtu               = IB_MTU_1024;
+    attr.dest_qp_num            = qpinfo_c->qpn;
+    attr.rq_psn                 = 0;
+    attr.max_dest_rd_atomic     = 1;
+    attr.min_rnr_timer          = 12;
+    attr.ah_attr.type           = RDMA_AH_ATTR_TYPE_ROCE;
+    attr.ah_attr.sl             = 0;
+    attr.ah_attr.port_num       = 1;
+    attr.ah_attr.ah_flags       = IB_AH_GRH;
+   // attr.ah_attr.grh.dgid       = gid;
+    attr.ah_attr.grh.hop_limit  = 1;
+    attr.ah_attr.grh.sgid_index = 2;
+    memcpy(&attr.ah_attr.roce.dmac,qpinfo_c->ahattr.roce.dmac,6);
+  int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
+
+    //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
     int i =0;
     printk("dmac:");
     for(i = 0 ;i< 6; i++)
@@ -775,12 +801,89 @@ static void krdma_run_client(struct krdma_cb *cb)
     qpinfo->qkey = 0;
     qpinfo->pkey = 0;
 
-    start_my_client(cb,(char *)qpinfo,size,(char *)qpinfo_s,size);
+    
 
+
+//for find mac 
+    union ib_gid gid;
+    ret = rdma_query_gid(ibdev,1,0,&gid);
+    if(ret ==0)
+    {printk("find local gid success\n");
+    int i =0;
+    for(i = 0;i < 16; i++)
+    {
+        printk("%x",gid.raw[i]);
+        printk(":");
+    }
+    }
+    else
+    {
+        printk("gid cannot find \n");goto error4;
+        
+    }
+
+//for find mac 
+    memset(&attr,0,sizeof(attr));
+    attr.qp_state               = IB_QPS_RTR;
+    attr.path_mtu               = IB_MTU_1024;
+    attr.dest_qp_num            = qpinfo_c->qpn;
+    attr.rq_psn                 = 0;
+    attr.max_dest_rd_atomic     = 1;
+    attr.min_rnr_timer          = 12;
+    attr.ah_attr.type           = RDMA_AH_ATTR_TYPE_ROCE;
+    attr.ah_attr.sl             = 0;
+    attr.ah_attr.port_num       = 1;
+    attr.ah_attr.ah_flags       = IB_AH_GRH;
+    attr.ah_attr.grh.dgid       = gid;
+    attr.ah_attr.grh.hop_limit  = 1;
+    attr.ah_attr.grh.sgid_index = 0;
+
+  int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
+
+    //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
+
+    ib_resolve_eth_dmac(ibdev,&attr, &qp_attr_mask2);
+    memcpy(qpinfo->ahattr,&attr.ah_attr,sizeof(struct rdma_ah_attr));
+    start_my_client(cb,(char *)qpinfo,size,(char *)qpinfo_s,size);
+    
      printk("server's qpinfo : \n");
     printk("server: qpn:0x %d \n",qpinfo_s->qpn);
     printk("server: qkey:0x %d \n",qpinfo_s->qkey);
     printk("server: pkey: 0x %d \n",qpinfo_s->pkey);
+
+    printk("start to modify qp \n");
+    int i  = 0;
+    printk("remote dmac:");
+    for(i =0; i< 6; i++)
+    printk("%x",qpinfo_s->ahattr.roce.dmac[i]);
+
+//end
+    memset(&gid,0,sizeof(gid));
+    memset(&attr,0,sizeof(attr));
+    memcpy(&attr.ah_attr.grh.dgid,&qpinfo_s->ahattr.dgid,sizeof(union ib_gid));
+
+    attr.qp_state               = IB_QPS_RTR;
+    attr.path_mtu               = IB_MTU_1024;
+    attr.dest_qp_num            = qpinfo_c->qpn;
+    attr.rq_psn                 = 0;
+    attr.max_dest_rd_atomic     = 1;
+    attr.min_rnr_timer          = 12;
+    attr.ah_attr.type           = RDMA_AH_ATTR_TYPE_ROCE;
+    attr.ah_attr.sl             = 0;
+    attr.ah_attr.port_num       = 1;
+    attr.ah_attr.ah_flags       = IB_AH_GRH;
+    //attr.ah_attr.grh.dgid       = gid;
+    attr.ah_attr.grh.hop_limit  = 1;
+    attr.ah_attr.grh.sgid_index = 0;
+
+    memcpy(&attr.ah_attr.roce.dmac,qpinfo_s->ahattr.roce.dmac,6);
+  int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
+
+    ret = ib_modify_qp(ibqp,&attr,qp_attr_mask2);
+    if(ret == 0)
+        printk("modify qp to rtr success \n");
+    else 
+        {printk("modify qp rtr failed \n"); goto error4;}
 
     printk("start to modify qp \n");
 
