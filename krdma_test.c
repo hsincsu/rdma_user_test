@@ -194,16 +194,16 @@ struct krdma_cb{
 
 };
 
-int ib_resolve_eth_dmac(struct ib_qp_attr *qp_attr, int *qp_attr_mask)
+int ib_resolve_eth_dmac(struct ib_device* ibdev,struct ib_qp_attr *qp_attr, int *qp_attr_mask)
 {
         int           ret = 0;
 
         if (*qp_attr_mask & IB_QP_AV) {
-                if (qp_attr->ah_attr.port_num < rdma_start_port(qp->device) ||
-                    qp_attr->ah_attr.port_num > rdma_end_port(qp->device))
+                if (qp_attr->ah_attr.port_num < rdma_start_port(ibdev) ||
+                    qp_attr->ah_attr.port_num > rdma_end_port(ibdev))
                         return -EINVAL;
 
-                if (!rdma_cap_eth_ah(qp->device, qp_attr->ah_attr.port_num))
+                if (!rdma_cap_eth_ah(ibdev, qp_attr->ah_attr.port_num))
                         return 0;
 
                 if (rdma_link_local_addr((struct in6_addr *)qp_attr->ah_attr.grh.dgid.raw)) {
@@ -554,8 +554,10 @@ static void krdma_run_server(struct krdma_cb *cb)
     qpinfo->qkey = 0;
     qpinfo->pkey = 0;
 
-    start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
+   // start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
 
+
+	qpinfo_c->qpn =4;
     printk("client's qpinfo : \n");
     printk("client: qpn:0x %d \n",qpinfo_c->qpn);
     printk("client: qkey:0x %d \n",qpinfo_c->qkey);
@@ -578,7 +580,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         {printk("modify qp failed \n");goto error4;}
 
     union ib_gid gid;
-    ret = rdma_query_gid(ibdev,0,2,&gid);
+    ret = rdma_query_gid(ibdev,1,0,&gid);
     if(ret ==0)
     {printk("find gid success\n");
     int i =0;
@@ -610,11 +612,11 @@ static void krdma_run_server(struct krdma_cb *cb)
     attr.ah_attr.grh.hop_limit  = 1;
     attr.ah_attr.grh.sgid_index = 0;
 
-  int qp_attr_mask2 = IB_QP_STATE|IP_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
+  int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
 
-    ib_resolve_eth_dmac(&attr, &qp_attr_mask2);
+    ib_resolve_eth_dmac(ibdev,&attr, &qp_attr_mask2);
     ret = ib_modify_qp(ibqp,&attr,qp_attr_mask2);
     if(ret == 0)
         printk("modify qp to rtr success \n");
