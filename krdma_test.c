@@ -611,13 +611,17 @@ static void krdma_run_server(struct krdma_cb *cb)
 
     ib_resolve_eth_dmac(ibdev,&attr, &qp_attr_mask2);
     memcpy(&qpinfo->ahattr,&attr.ah_attr,sizeof(struct rdma_ah_attr));
-
+    int i =0;
+    for(i = 0; i< 6; i++)
+    {
+        printk("%x",attr.ah_attr.roce.dmac[i]);
+    }
     start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
     printk("client's qpinfo : \n");
     printk("client: qpn:0x %d \n",qpinfo_c->qpn);
     printk("client: qkey:0x %d \n",qpinfo_c->qkey);
     printk("client: pkey: 0x %d \n",qpinfo_c->pkey);
-    int i  = 0;
+    i  = 0;
     printk("remote dmac:");
     for(i =0; i< 6; i++)
     printk("%x",qpinfo_c->ahattr.roce.dmac[i]);
@@ -857,6 +861,13 @@ static void krdma_run_client(struct krdma_cb *cb)
 
     ib_resolve_eth_dmac(ibdev,&attr, &qp_attr_mask2);
     memcpy(&qpinfo->ahattr,&attr.ah_attr,sizeof(struct rdma_ah_attr));
+
+    int i =0;
+    for(i = 0; i< 6; i++)
+    {
+        printk("%x",attr.ah_attr.roce.dmac[i]);
+    }
+
     start_my_client(cb,(char *)qpinfo,size,(char *)qpinfo_s,size);
     
      printk("server's qpinfo : \n");
@@ -865,7 +876,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     printk("server: pkey: 0x %d \n",qpinfo_s->pkey);
 
     printk("start to modify qp \n");
-    int i  = 0;
+    i  = 0;
     printk("remote dmac:");
     for(i =0; i< 6; i++)
     printk("%x",qpinfo_s->ahattr.roce.dmac[i]);
