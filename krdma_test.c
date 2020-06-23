@@ -76,10 +76,17 @@ struct krdma_stats {
 
 #define htonll(x) cpu_to_be64((x))
 #define ntohll(x) cpu_to_be64((x))
-
 //for change info between client / server.
 #define EXCHANGE_QPINFO 0x100;
+
 #define EXCHANGE_ADDRINFO 0x101;
+
+struct addr_info{
+    uint64_t remote_addr;
+    uint64_t size;
+    uint64_t rkey;
+};
+
 
 struct qp_info{
     uint32_t qpn;
@@ -87,13 +94,9 @@ struct qp_info{
     uint32_t pkey;
     union ib_gid gid;
     u8 dmac[6];
+    struct addr_info addr;
 };
 
-struct addr_info{
-    uint64_t remote_addr;
-    uint64_t size;
-    uint64_t rkey;
-};
 //end
 
 static DEFINE_MUTEX(krdma_mutex);
@@ -123,6 +126,7 @@ struct krdma_buf_info{
         uint64_t *buf;
         uint32_t rkey;
         uint32_t size;
+        uint32_t lkey;
 };
 
 
@@ -534,6 +538,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     atomic_inc(&ibpd->usecnt);
     cb->rdma_mr->need_inval = false;
     cb->send_buf.rkey       = cb->rdma_mr->rkey; // get rkey
+    cb->send_buf.lkey       = cb->rdma_mr->lkey;
 
     cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
     if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
@@ -637,11 +642,18 @@ static void krdma_run_server(struct krdma_cb *cb)
     }
 
     memcpy(&qpinfo->gid,&gid,sizeof(union ib_gid));
+    qpinfo->addr.remote_addr = cb->send_buf.buf;
+    qpinfo->addr.size        = cb->send_buf.size;
+    qpinfo->addr.rkey        = cb->send_buf.rkey;
     start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
     printk("client's qpinfo : \n");
     printk("client: qpn:0x %d \n",qpinfo_c->qpn);
     printk("client: qkey:0x %d \n",qpinfo_c->qkey);
     printk("client: pkey: 0x %d \n",qpinfo_c->pkey);
+    printk("client: addr : 0x%lx \n",qpinfo_c->addr.remote_addr);
+    printk("client: size : 0x%lx \n",qpinfo_c->addr.size);
+    printk("client: rkey : 0x%lx \n",qpinfo_c->addr.rkey);
+
     i  = 0;
     printk("remote dmac:");
     for(i =0; i< 6; i++)
@@ -681,17 +693,37 @@ static void krdma_run_server(struct krdma_cb *cb)
     else 
         {printk("modify qp rtr failed \n"); goto error4;}
 
-    printk("start to modify qp \n");
-    #if 0
-    struct ib_qp_attr attr;
-    attr.qp_state = IB_QPS_INIT;
-    attr.pkey_index = 0x0;
-//  attr.qkey = 0x0;
-    attr.port_num = 1;
-    attr.qp_access_flags =IB_ACCESS_REMOTE_WRITE | IB_ACCESS_REMOTE_READ |
-                            IB_ACCESS_LOCAL_WRITE | IB_ACCESS_REMOTE_ATOMIC;
-    int qp_attr_mask = IB_QP_STATE | IB_QP_PKEY_INDEX |IB_QP_PORT |IB_QP_ACCESS_FLAGS;
-    #endif
+
+    memset(&attr,0,sizeof(attr));
+    attr.qp_state = IB_QPS_RTS;
+    attr.timeout = 14;
+    attr.retry_cnt = 7;
+    attr.rnr_retry = 6;
+    attr.sq_psn = 0;
+    attr.max_rd_atomic = 1;
+
+    qp_attr_mask2 = 0;
+    qp_attr_mask2 = IB_QP_STATE | IB_QP_TIMEOUT |IB_QP_RETRY_CNT|IB_QP_RNR_RETRY | IB_QP_SQ_PSN | IB_QP_MAX_QP_RD_ATOMIC;
+
+    ret = ib_modify_qp(ibqp,&attr,qp_attr_mask2);
+    if(ret == 0)
+        printk("modify qp to rts success \n");
+    else 
+        {printk("modify qp rts failed \n"); goto error4;}
+
+
+    struct ib_wc wc;
+        if(ib_poll_cq(ibcq,1,&wc)>=0){
+        if(wc.status ==IB_WC_SUCCESS)
+        {printk("Successful \n");//added by hs           
+        printk("send buf: 0x%x \n",*cb->send_buf.buf);
+        }
+        else
+        printk("Failur: %d \n",wc.status);//added by h
+        }
+
+    
+
 
 error4:
     kfree(bufaddr);
@@ -787,6 +819,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     cb->qp = ibqp;
 
     bufaddr = kzalloc(16,GFP_KERNEL);
+    memset(bufaddr,0x12345678,4);
     cb->send_buf.buf = bufaddr;
     cb->send_buf.size = 16;
     cb->rdma_mr  = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
@@ -802,6 +835,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     atomic_inc(&ibpd->usecnt);
     cb->rdma_mr->need_inval = false;
     cb->send_buf.rkey       = cb->rdma_mr->rkey; // get rkey
+    cb->send_buf.lkey       = cb->rdma_mr->lkey;
 
     cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
     if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
@@ -906,13 +940,18 @@ static void krdma_run_client(struct krdma_cb *cb)
     }
 
     memcpy(&qpinfo->gid,&gid,sizeof(union ib_gid));
-
+    qpinfo->addr.remote_addr = cb->send_buf.buf;
+    qpinfo->addr.size        = cb->send_buf.size;
+    qpinfo->addr.rkey        = cb->send_buf.rkey;
     start_my_client(cb,(char *)qpinfo,size,(char *)qpinfo_s,size);
     
      printk("server's qpinfo : \n");
     printk("server: qpn:0x %d \n",qpinfo_s->qpn);
     printk("server: qkey:0x %d \n",qpinfo_s->qkey);
     printk("server: pkey: 0x %d \n",qpinfo_s->pkey);
+    printk("server: addr : 0x%lx \n",qpinfo_s->addr.remote_addr);
+    printk("server: size : 0x%lx \n",qpinfo_s->addr.size);
+    printk("server: rkey : 0x%lx \n",qpinfo_s->addr.rkey);
 
     printk("start to modify qp \n");
     i  = 0;
@@ -947,7 +986,68 @@ static void krdma_run_client(struct krdma_cb *cb)
     else 
         {printk("modify qp rtr failed \n"); goto error4;}
 
-    printk("start to modify qp \n");
+ 
+    memset(&attr,0,sizeof(attr));
+    attr.qp_state = IB_QPS_RTS;
+    attr.timeout = 14;
+    attr.retry_cnt = 7;
+    attr.rnr_retry = 6;
+    attr.sq_psn = 0;
+    attr.max_rd_atomic = 1;
+
+    qp_attr_mask2 = 0;
+    qp_attr_mask2 = IB_QP_STATE | IB_QP_TIMEOUT |IB_QP_RETRY_CNT|IB_QP_RNR_RETRY | IB_QP_SQ_PSN | IB_QP_MAX_QP_RD_ATOMIC;
+
+    ret = ib_modify_qp(ibqp,&attr,qp_attr_mask2);
+    if(ret == 0)
+        printk("modify qp to rts success \n");
+    else 
+        {printk("modify qp rts failed \n"); goto error4;}
+
+
+    //befor rdma ops , we need to exchange addr info.
+
+
+
+
+    //RDMA WRITE
+    struct ib_sge sg1;
+    struct ib_rdma_wr wr1;
+    struct ib_rdma_wr *badwr;
+
+    printk("dwcclient:Setting sg... \n");//added by hs
+    memset(&sg1,0,sizeof(sg1));
+    sg1.addr =(uintptr_t)cb->send_buf.buf;
+    sg1.length = cb->send_buf.size;
+    sg1.lkey = cb->send_buf.lkey;
+
+     memset(&wr1,0,sizeof(wr1));
+     wr1.wr.wr_id =(uintptr_t) &wr1;
+    wr1.wr.sg_list = &sg1;
+    wr1.wr.num_sge = 1;
+    wr1.wr.opcode = IB_WR_RDMA_WRITE;
+    wr1.wr.send_flags = IB_SEND_SIGNALED;
+    wr1.remote_addr =(uintptr_t) qpinfo_s->addr.remote_addr;
+    wr1.rkey = qpinfo_s->addr.size;
+
+    printk("dwcclient:Posting Send .. \n");//added by hs
+    if(ib_post_send(ibqp,&wr1,&badwr)){
+                printk("Error posting send .. \n");//added by hs
+                goto error4;
+        }
+
+    struct ib_wc wc;
+    if(ib_poll_cq(ibcq,1,&wc)>=0){
+    if(wc.status ==IB_WC_SUCCESS)
+            printk("Successful \n");//added by hs           
+    else
+        {printk("Failur: %d \n",wc.status); goto error4;}//added by hs
+    
+    }
+
+
+
+
 
 
 error4:
