@@ -1028,7 +1028,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     wr1.wr.opcode = IB_WR_RDMA_WRITE;
     wr1.wr.send_flags = IB_SEND_SIGNALED;
     wr1.remote_addr =(uintptr_t) qpinfo_s->addr.remote_addr;
-    wr1.rkey = qpinfo_s->addr.size;
+    wr1.rkey = qpinfo_s->addr.rkey;
 
     printk("dwcclient:Posting Send .. \n");//added by hs
     if(ib_post_send(ibqp,&wr1,&badwr)){
