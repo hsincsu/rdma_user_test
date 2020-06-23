@@ -645,7 +645,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     i  = 0;
     printk("remote dmac:");
     for(i =0; i< 6; i++)
-    printk("%x",qpinfo_c->ahattr.roce.dmac[i]);
+    printk("%x",qpinfo_c->dmac[i]);
 
 //end
     memset(&gid,0,sizeof(gid));
@@ -665,7 +665,7 @@ static void krdma_run_server(struct krdma_cb *cb)
    // attr.ah_attr.grh.dgid       = gid;
     attr.ah_attr.grh.hop_limit  = 1;
     attr.ah_attr.grh.sgid_index = 2;
-    memcpy(attr.ah_attr.roce.dmac,qpinfo_c->ahattr.roce.dmac,6);
+    memcpy(attr.ah_attr.roce.dmac,qpinfo_c->dmac,6);
     qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
@@ -918,7 +918,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     i  = 0;
     printk("remote dmac:");
     for(i =0; i< 6; i++)
-    printk("%x",qpinfo_s->ahattr.roce.dmac[i]);
+    printk("%x",qpinfo_s->dmac[i]);
 
 //end
     memset(&attr,0,sizeof(attr));
@@ -938,7 +938,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     attr.ah_attr.grh.hop_limit  = 1;
     attr.ah_attr.grh.sgid_index = 2;
 
-    memcpy(attr.ah_attr.roce.dmac,qpinfo_s->ahattr.roce.dmac,6);
+    memcpy(attr.ah_attr.roce.dmac,qpinfo_s->dmac,6);
     qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     ret = ib_modify_qp(ibqp,&attr,qp_attr_mask2);
