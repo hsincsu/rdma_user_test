@@ -522,18 +522,17 @@ static void krdma_run_server(struct krdma_cb *cb)
     }
     cb->qp = ibqp;
 
-    //bufaddr             = kzalloc(16,GFP_KERNEL);
-    //cb->send_buf.buf    = bufaddr;
+    bufaddr             = kzalloc(16,GFP_KERNEL);
+    cb->send_buf.buf    = bufaddr;
     printk("start to alloc dma buf\n");
-    cb->send_buf.size   = 1024;
-    cb->send_buf.buf = ib_dma_alloc_coherent(ibpd,cb->send_buf.size,&cb->send_dma_addr,GFP_KERNEL);
-    if(!cb->send_buf.buf){
-        printk("dealloc failed \n");
-        ret = -ENOMEM;
-        goto error2;
-    }
-
+    cb->send_buf.size   = 16;
     printk("end of alloc dma buf \n");
+    cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
+    if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
+    {
+            printk("mapping error \n");
+            goto error4;
+    }
     cb->page_list_len   = (((cb->size - 1) & PAGE_MASK) + PAGE_SIZE)>> PAGE_SHIFT;
     cb->rdma_mr         = ib_alloc_mr(cb->pd, IB_MR_TYPE_MEM_REG,cb->page_list_len);
     if(IS_ERR(cb->rdma_mr)){
@@ -541,23 +540,13 @@ static void krdma_run_server(struct krdma_cb *cb)
             ret = PTR_ERR(cb->rdma_mr);
             goto error3;
     }
-
     printk("reg rkey:0x%x, page_list_len %u\n",cb->rdma_mr->rkey,cb->page_list_len);
-
     // cb->rdma_mr->device     = ibpd->device;
     // cb->rdma_mr->pd         = ibpd;
     // cb->rdma_mr->uobject    = NULL;
-
     // cb->rdma_mr->need_inval = false;
     cb->send_buf.rkey       = cb->rdma_mr->rkey; // get rkey
     cb->send_buf.lkey       = cb->rdma_mr->lkey;
-
-    // cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
-    // if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
-    // {
-    //         printk("mapping error \n");
-    //         goto error4;
-    // }
 
     printk("create rs success end \n");
     printk("start to exchange qpinfo with client \n");
@@ -834,25 +823,24 @@ static void krdma_run_client(struct krdma_cb *cb)
     }
     cb->qp = ibqp;
 
-    // bufaddr = kzalloc(16,GFP_KERNEL);
+      bufaddr = kzalloc(16,GFP_KERNEL);
     // memset(bufaddr,0x12345678,4);
     // printk("client:0x%x \n",*bufaddr);
      printk("start to alloc dma buf\n");
-    cb->send_buf.size   = 1024;
-    cb->send_buf.buf = ib_dma_alloc_coherent(ibpd,cb->send_buf.size,&cb->send_dma_addr,GFP_KERNEL);
-    if(!cb->send_buf.buf){
-        printk("dealloc failed \n");
-        ret = -ENOMEM;
-        goto error2;
-    }
+    cb->send_buf.size   = 16;
+    cb->send_buf.buf    = bufaddr;
     memset((void *)cb->send_buf.buf,"hello",5);
     printk("send buf: %s \n",*cb->send_buf.buf);
     
      printk("endto alloc dma buf\n");
-    
+     cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
+    if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
+    {
+            printk("mapping error \n");
+            goto error4;
+    }
     cb->page_list_len   = (((cb->size - 1) & PAGE_MASK) + PAGE_SIZE)>> PAGE_SHIFT;
     cb->rdma_mr         = ib_alloc_mr(cb->pd, IB_MR_TYPE_MEM_REG,cb->page_list_len);
-
     // cb->send_buf.buf = bufaddr;
     // cb->send_buf.size = 16;
     // cb->rdma_mr  = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
@@ -866,16 +854,9 @@ static void krdma_run_client(struct krdma_cb *cb)
     // cb->rdma_mr->pd         = ibpd;
     // cb->rdma_mr->uobject    = NULL;
     // //atomic_inc(&ibpd->usecnt);
-    cb->rdma_mr->need_inval = false;
+    //cb->rdma_mr->need_inval = false;
     cb->send_buf.rkey       = cb->rdma_mr->rkey; // get rkey
     cb->send_buf.lkey       = cb->rdma_mr->lkey;
-
-    // cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
-    // if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
-    // {
-    //         printk("mapping error \n");
-    //         goto error4;
-    // }
     printk("create rs success end \n");
 
     printk("start to exchange info with server \n");
