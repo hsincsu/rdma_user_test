@@ -1,4 +1,4 @@
-//#include <config.h>
+#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
 	ctx1->buf = memalign(page_size, size);
 
 	memcpy(ctx1->buf,"hello,world",12);
-	printk("buf: 0x%s \n",ctx1->buf);
+	printf("buf: 0x%s \n",ctx1->buf);
 
 	printf("dwcrdma-user:ibv_open_device \n");
     ctx1->context = ibv_open_device(ib_dev);
