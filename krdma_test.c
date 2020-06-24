@@ -200,6 +200,74 @@ struct krdma_cb{
 
 };
 
+enum gid_table_entry_state {
+        GID_TABLE_ENTRY_INVALID         = 1,
+        GID_TABLE_ENTRY_VALID           = 2,
+        /*
+         * Indicates that entry is pending to be removed, there may
+         * be active users of this GID entry.
+         * When last user of the GID entry releases reference to it,
+         * GID entry is detached from the table.
+         */
+        GID_TABLE_ENTRY_PENDING_DEL     = 3,
+};
+
+struct ib_gid_table_entry {
+        struct kref                     kref;
+        struct work_struct              del_work;
+        struct ib_gid_attr              attr;
+        void                            *context;
+        enum gid_table_entry_state      state;
+};
+
+
+bool is_gid_entry_valid(struct ib_gid_table_entry *entry)
+{
+    return entry && entry->state == GID_TABLE_ENTRY_VALID;
+}
+
+static void get_gid_entry(struct ib_gid_table_entry *entry)
+{
+        kref_get(&entry->kref);
+}
+
+
+struct ib_gid_attr *rdma_find_gid_by_device(struct ib_device *ibdev, union ib_gid *gid, int port){
+            struct ib_gid_attr *res = NULL;
+            struct ib_gid_table *table;
+            unsigned long flags;
+
+            if(port >= rdma_start_port(ibdev) && port <= rdma_end_port(ibdev)){
+                printk("port valid \n");
+            }
+            else return NULL;
+
+            table = ibdev->cache.ports[port - rdma_start_port(ibdev)].gid;
+            if(table)
+                printk("find table\n");
+            else return NULL;
+
+            read_lock_irqsave(&table->rwlock, flags);
+            for (i = 0; i < table->sz; i++) {
+                struct ib_gid_table_entry *entry = table->data_vec[i];
+
+                if (!is_gid_entry_valid(entry))
+                        continue;
+
+                if (memcmp(gid, &entry->attr.gid, sizeof(*gid)))
+                        continue;
+
+                        get_gid_entry(entry);
+                        res = &entry->attr;
+                        break;
+        }
+            read_unlock_irqrestore(&table->rwlock, flags);
+
+            return res;
+}
+
+
+
 int ib_resolve_eth_dmac(struct ib_device* ibdev,struct ib_qp_attr *qp_attr, int *qp_attr_mask)
 {
         int           ret = 0;
@@ -511,7 +579,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     qp_attr->cap.max_recv_wr = 10;
     qp_attr->cap.max_send_sge = 1;
     qp_attr->cap.max_recv_sge = 1;
-
+    qp_attr->sq_sig_type = IB_SIGNAL_ALL_WR;
     qp_attr->qp_type = IB_QPT_RC;
 
     ibqp = ib_create_qp(ibpd,qp_attr);
@@ -603,6 +671,8 @@ static void krdma_run_server(struct krdma_cb *cb)
     attr.ah_attr.grh.dgid       = gid;
     attr.ah_attr.grh.hop_limit  = 1;
     attr.ah_attr.grh.sgid_index = 0;
+    //add src gid attr
+
 
   int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
@@ -671,6 +741,9 @@ static void krdma_run_server(struct krdma_cb *cb)
     attr.ah_attr.grh.hop_limit  = 1;
     attr.ah_attr.grh.sgid_index = 2;
     memcpy(attr.ah_attr.roce.dmac,qpinfo_c->dmac,6);
+    //add src gid attr
+   attr.ah_attr.grh.sgid_attr = rdma_find_gid_by_device(ibdev,&qpinfo->gid,1);
+   
     qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
@@ -962,7 +1035,9 @@ static void krdma_run_client(struct krdma_cb *cb)
     attr.ah_attr.grh.hop_limit  = 1;
     attr.ah_attr.grh.sgid_index = 2;
     memcpy(attr.ah_attr.roce.dmac,qpinfo_s->dmac,6);
-
+    //add src gid attr
+   attr.ah_attr.grh.sgid_attr = rdma_find_gid_by_device(ibdev,&qpinfo->gid,1);
+  
     qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     ret = ib_modify_qp(ibqp,&attr,qp_attr_mask2);
