@@ -53,6 +53,21 @@ struct qp_info{
 };
 
 
+static void usage(const char *argv0)
+{
+        printf("Usage:\n");
+        printf("  %s            start a server and wait for connection\n", argv0);
+        printf("  %s <host>     connect to server at <host>\n", argv0);
+        printf("\n");
+        printf("Options:\n");
+        printf("  -p, --port=<port>      listen on/connect to port <port> (default 18515)\n");
+        printf("  -i, --ib-port=<port>   use port <port> of IB device (default 1)\n");
+        printf("  -s, --size=<size>      size of message to exchange (default 4096)\n");
+        printf("  -g, --gid-idx=<gid index> local port gid index\n");
+}
+
+
+
 
 int main(int argc, char *argv[])
 {
