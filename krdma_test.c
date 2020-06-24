@@ -642,7 +642,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     }
 
     memcpy(&qpinfo->gid,&gid,sizeof(union ib_gid));
-    qpinfo->addr.remote_addr = cb->send_dma_addr;
+    qpinfo->addr.remote_addr = cb->send_buf.buf;
     qpinfo->addr.size        = cb->send_buf.size;
     qpinfo->addr.rkey        = cb->send_buf.rkey;
     start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
@@ -660,11 +660,11 @@ static void krdma_run_server(struct krdma_cb *cb)
     printk("%x",qpinfo_c->dmac[i]);
 
 //end
-    memset(&gid,0,sizeof(gid));
+    
     memset(&attr,0,sizeof(attr));
     memcpy(&attr.ah_attr.grh.dgid,&qpinfo_c->gid,sizeof(union ib_gid));
     printk("gid:");
-    for(i =0;i<15;i++)
+    for(i =0;i<16;i++)
     printk("%x",attr.ah_attr.grh.dgid.raw[i]);
 
     attr.qp_state               = IB_QPS_RTR;
@@ -823,6 +823,7 @@ static void krdma_run_client(struct krdma_cb *cb)
 
     bufaddr = kzalloc(16,GFP_KERNEL);
     memset(bufaddr,0x12345678,4);
+    printk("client:0x%x \n",*(int *)bufaddr);
     cb->send_buf.buf = bufaddr;
     cb->send_buf.size = 16;
     cb->rdma_mr  = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
@@ -966,7 +967,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     memset(&attr,0,sizeof(attr));
     memcpy(&attr.ah_attr.grh.dgid,&qpinfo_s->gid,sizeof(union ib_gid));
     printk("gid:");
-    for(i =0;i<15;i++)
+    for(i =0;i<16;i++)
     printk("%x",attr.ah_attr.grh.dgid.raw[i]);
 
     attr.qp_state               = IB_QPS_RTR;
@@ -1023,12 +1024,12 @@ static void krdma_run_client(struct krdma_cb *cb)
 
     printk("dwcclient:Setting sg... \n");//added by hs
     memset(&sg1,0,sizeof(sg1));
-    sg1.addr =(uintptr_t)cb->send_dma_addr;
+    sg1.addr =(uintptr_t)cb->send_buf.buf;
     sg1.length = cb->send_buf.size;
     sg1.lkey = cb->send_buf.lkey;
 
      memset(&wr1,0,sizeof(wr1));
-     wr1.wr.wr_id =(uintptr_t) &wr1;
+     wr1.wr.wr_id =2;
     wr1.wr.sg_list = &sg1;
     wr1.wr.num_sge = 1;
     wr1.wr.opcode = IB_WR_RDMA_WRITE;
