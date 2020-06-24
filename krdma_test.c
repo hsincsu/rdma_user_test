@@ -1031,7 +1031,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     memset(&sg1,0,sizeof(sg1));
     sg1.addr =(uintptr_t)cb->send_dma_addr;
     sg1.length = cb->send_buf.size;
-    sg1.lkey = cb->send_buf.lkey;
+    sg1.lkey = ibpd->local_dma_lkey;
 
      memset(&wr1,0,sizeof(wr1));
      wr1.wr.wr_id =1;
