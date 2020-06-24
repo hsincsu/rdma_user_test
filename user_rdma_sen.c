@@ -22,6 +22,7 @@ struct pingpong_context {
         struct ibv_pd           *pd;
         struct ibv_mr           *mr;
         struct ibv_dm           *dm;
+		union  ibv_gid			*gid;
         union {
                 struct ibv_cq           *cq;
                 struct ibv_cq_ex        *cq_ex;
@@ -181,9 +182,9 @@ int main(int argc, char *argv[])
 	//alloc buf
 	struct qp_info *qpinfo = NULL;
     struct qp_info *qpinfo_c = NULL;
-    int size = sizeof(*qpinfo);
-    qpinfo_c = kmalloc(sizeof(*qpinfo_c),GFP_KERNEL);
-    qpinfo = kmalloc(sizeof(*qpinfo),GFP_KERNEL);
+    int qpinfosize = sizeof(*qpinfo);
+    qpinfo_c = malloc(sizeof(*qpinfo_c));
+    qpinfo = malloc(sizeof(*qpinfo));
     memset(qpinfo,0,sizeof(*qpinfo));
     memset(qpinfo_c,0,sizeof(*qpinfo_c));
 
@@ -198,7 +199,7 @@ int main(int argc, char *argv[])
 			.pkey_index      = 0,
 			.port_num        = 1,
 			.qp_access_flags = IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_REMOTE_READ |
-                              IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_ATOMIC;
+                              IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_ATOMIC
 		};
 
     if (ibv_modify_qp(ctx1->qp, &attr,
@@ -212,15 +213,10 @@ int main(int argc, char *argv[])
 	printf("modify qp init success\n");
 
 	union ibv_gid gid;
-	ret = ibv_query_gid(ctx1->context, )
+	ret = ibv_query_gid(ctx1->context, ib_port, gidx, ctx1->gid);
 
 
 
-	int i;
-again:	printf("please enter!");
-	scanf("%d",&i);	
-	printf("have enter:%d",i);
-	if(i == -1){
 	ibv_destroy_qp(ctx1->qp);
 	ibv_destroy_cq(ctx1->cq_s.cq);
 	ibv_dereg_mr(ctx1->mr);
@@ -228,9 +224,6 @@ again:	printf("please enter!");
 	ibv_close_device(ctx1->context);
 	free(ctx1->buf);
 	free(ctx1);
-	free(ctx2);
-	}
-	else
-	  goto  again;
+
 	return 0;
 }
