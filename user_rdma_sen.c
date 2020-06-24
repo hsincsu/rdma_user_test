@@ -464,7 +464,7 @@ if(ctx1->client == 1)
 	wr.wr.rdma.remote_addr = qpinfo_r->addr.remote_addr;
 	wr.wr.rdma.rkey	= 	qpinfo_r->addr.rkey;
 
-	if(ibv_post_send(ctx1->qp,&wr,bad_wr))
+	if(ibv_post_send(ctx1->qp,&wr,&bad_wr))
 	{
 		fprintf(stderr, "Couldn't post send\n");
         return 1;
