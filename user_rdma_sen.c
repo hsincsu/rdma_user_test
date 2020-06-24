@@ -378,9 +378,9 @@ if(ctx1->client == 1){
     printf("server: addr : 0x%lx \n",qpinfo_r->addr.remote_addr);
     printf("server: size : 0x%lx \n",qpinfo_r->addr.size);
     printf("server: rkey : 0x%lx \n",qpinfo_r->addr.rkey);
-	 printk("gid:");
+	 printf("gid:");
     for(i =0;i<16;i++)
-    printk("%x",qpinfo_r->gid.raw[i]);
+    printf("%x",qpinfo_r->gid.raw[i]);
 }
 else
 {
@@ -392,9 +392,9 @@ else
     printf("client: addr : 0x%lx \n",qpinfo_r->addr.remote_addr);
     printf("client: size : 0x%lx \n",qpinfo_r->addr.size);
     printf("client: rkey : 0x%lx \n",qpinfo_r->addr.rkey);
-	 printk("gid:");
+	 printf("gid:");
     for(i =0;i<16;i++)
-    printk("%x",qpinfo_r->gid.raw[i]);
+    printf("%x",qpinfo_r->gid.raw[i]);
 }
 
 	memset(&attr,0,sizeof(attr));
