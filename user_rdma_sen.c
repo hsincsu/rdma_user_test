@@ -378,6 +378,9 @@ int main(int argc, char *argv[])
 if(ctx1->client == 1){
 	start_my_client(ctx1,(char *)qpinfo,qpinfosize,(char *)qpinfo_r,qpinfosize);
 	printf("server's qpinfo : \n");
+	printf("gid:");
+    for(i =0;i<16;i++)
+    printf("%x",qpinfo_r->gid.raw[i]);
     printf("server: qpn:0x %d \n",qpinfo_r->qpn);
     printf("server: qkey:0x %d \n",qpinfo_r->qkey);
     printf("server: pkey: 0x %d \n",qpinfo_r->pkey);
@@ -392,15 +395,17 @@ else
 {
 	start_my_server(ctx1,(char *)qpinfo,qpinfosize,(char *)qpinfo_r,qpinfosize);
 	printf("client's qpinfo : \n");
+ 	printf("gid:");
+    for(i =0;i<16;i++)
+    printf("%x",qpinfo_r->gid.raw[i]);
+
     printf("client: qpn:0x %d \n",qpinfo_r->qpn);
     printf("client: qkey:0x %d \n",qpinfo_r->qkey);
     printf("client: pkey: 0x %d \n",qpinfo_r->pkey);
     printf("client: addr : 0x%lx \n",qpinfo_r->addr.remote_addr);
     printf("client: size : 0x%lx \n",qpinfo_r->addr.size);
     printf("client: rkey : 0x%lx \n",qpinfo_r->addr.rkey);
-	 printf("gid:");
-    for(i =0;i<16;i++)
-    printf("%x",qpinfo_r->gid.raw[i]);
+	
 }
 
 	memset(&attr,0,sizeof(attr));
