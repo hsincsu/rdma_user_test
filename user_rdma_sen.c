@@ -133,6 +133,7 @@ int main(int argc, char *argv[])
 					 break;
 			 case 'g':
 			 		gidx = strtol(optarg, NULL, 0);
+					printf("gidx :%d \n",gidx);
 					 break;
 			 default:
 			 		usage(argv[0]);
@@ -242,6 +243,8 @@ int main(int argc, char *argv[])
 
 	union ibv_gid gid;
 	ret = ibv_query_gid(ctx1->context, ib_port, gidx, ctx1->gid);
+
+
 
 
 clean_qp:
