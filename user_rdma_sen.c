@@ -91,11 +91,13 @@ int start_my_server(struct pingpong_context *ctx,char *send_buf,int sendsize ,ch
 		struct sockaddr_in clienaddr;
 		int recvlen;
 
+		printf("start server socket\n");
 		if( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
     	printf("create socket error: %s(errno: %d)\n", strerror(errno),errno);
     	exit(0);
     	}
 
+		printf("socket create success\n");
 		memset(&clienaddr,0,sizeof(clienaddr));
 		clienaddr.sin_family = AF_INET;
 		clienaddr.sin_port 	 = htons(ctx->port);
@@ -106,7 +108,6 @@ int start_my_server(struct pingpong_context *ctx,char *send_buf,int sendsize ,ch
 			 printf("bind socket error:%s(errno:%d)\n",strerror(errno),errno);
         	 exit(0);
 		}
-
 		printf("bind ok\n");
 
 	  	if(listen(sockfd,10) == -1)
@@ -114,12 +115,13 @@ int start_my_server(struct pingpong_context *ctx,char *send_buf,int sendsize ,ch
 			printf("listen socket error:%s(errno:%d)\n",strerror(errno),errno);
 			exit(0);
 		}
-
+		printf("listen ok\n");
 		while(1){
 			if((connfd = accept(sockfd,(struct sockaddr *)NULL, NULL)) == -1){
 				printf("accept socket error :%s(errno:%d)\n",strerror(errno),errno);
             	continue;
 			}
+			printf("accept ok\n");
 
 			recvlen = recv(connfd,recv_buf,recvsize,0);
 			if(0 >= recvlen)
@@ -152,11 +154,13 @@ int start_my_client(struct pingpong_context *ctx,char *send_buf,int sendsize ,ch
 		struct sockaddr_in servaddr;
 		int	 recvlen;
 
+		printf("client socket start \n");
 		if( (sockfd = socket(AF_INET, SOCK_STREAM, 0)) < 0){
     	printf("create socket error: %s(errno: %d)\n", strerror(errno),errno);
     	exit(0);
     	}
 		
+		printf("socket create ok\n");
 		memset(&servaddr, 0, sizeof(servaddr));
 		servaddr.sin_family = AF_INET;
 		servaddr.sin_port 	= htons(ctx->port);
@@ -170,6 +174,7 @@ int start_my_client(struct pingpong_context *ctx,char *send_buf,int sendsize ,ch
     		exit(0);
 		}
 
+		printf("socket connect ok \n");
 		printf("client: send ..\n");
 		if(send(sockfd,send_buf,sendsize,0) < 0)
 		{
