@@ -123,7 +123,7 @@ enum test_state {
 
 
 struct krdma_buf_info{
-        uint64_t *buf;
+        char *buf;
         uint32_t rkey;
         uint32_t size;
         uint32_t lkey;
@@ -148,7 +148,7 @@ struct krdma_cb{
         struct krdma_buf_info recv_buf __aligned(16);
         u64 recv_dma_addr;
 
-
+        int page_list_len;
         struct ib_send_wr sg_wr;
         struct ib_sge send_sg1;
         struct krdma_buf_info send_buf __aligned(16);
@@ -457,7 +457,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     struct ib_mr *ibmr;
     struct ib_qp *ibqp;
     int ret;
-    uint64_t *bufaddr;
+    char *bufaddr;
 
     printk("get cb's info: \n");
     u32 ipaddr;
@@ -522,30 +522,40 @@ static void krdma_run_server(struct krdma_cb *cb)
     }
     cb->qp = ibqp;
 
-    bufaddr             = kzalloc(16,GFP_KERNEL);
-    cb->send_buf.buf    = bufaddr;
+    //bufaddr             = kzalloc(16,GFP_KERNEL);
+    //cb->send_buf.buf    = bufaddr;
     cb->send_buf.size   = 16;
-    cb->rdma_mr         = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
+    cb->send_buf.buf = ib_dma_alloc_coherent(ibpd,cb->send_buf.size,&cb->send_dma_addr,GFP_KERNEL);
+    if(!cb->send_buf.buf){
+        printk("dealloc failed \n");
+        ret = -ENOMEM;
+        goto error2;
+    }
+    cb->page_list_len   = (((cb->size - 1) & PAGE_MASK) + PAGE_SIZE)>> PAGE_SHIFT;
+    cb->rdma_mr         = ib_alloc_mr(cb->pd, IB_MR_TYPE_MEM_REG,cb->page_list_len);
     if(IS_ERR(cb->rdma_mr)){
             printk("rdma mr wrong \n");
             ret = PTR_ERR(cb->rdma_mr);
             goto error3;
     }
 
+    printk("reg rkey:0x%x, page_list_len %u\n",cb->rdma_mr->rkey,cb->page_list_len);
+
     cb->rdma_mr->device     = ibpd->device;
     cb->rdma_mr->pd         = ibpd;
     cb->rdma_mr->uobject    = NULL;
-    atomic_inc(&ibpd->usecnt);
+
     cb->rdma_mr->need_inval = false;
     cb->send_buf.rkey       = cb->rdma_mr->rkey; // get rkey
     cb->send_buf.lkey       = cb->rdma_mr->lkey;
 
-    cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
-    if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
-    {
-            printk("mapping error \n");
-            goto error4;
-    }
+    // cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
+    // if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
+    // {
+    //         printk("mapping error \n");
+    //         goto error4;
+    // }
+
     printk("create rs success end \n");
     printk("start to exchange qpinfo with client \n");
 
@@ -722,7 +732,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         printk("send buf: 0x%x \n",*cb->send_buf.buf);
         }
         else
-        printk("Failur: %d \n",wc.status);//added by h
+        {printk("Failur: %d \n",wc.status);goto error4;}//added by h
         }
 
     
@@ -757,7 +767,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     struct ib_mr *ibmr;
     struct ib_qp *ibqp;
     int ret;
-    uint64_t *bufaddr;
+    char *bufaddr;
 
     printk("get cb's info: \n");
     u32 ipaddr;
@@ -821,12 +831,25 @@ static void krdma_run_client(struct krdma_cb *cb)
     }
     cb->qp = ibqp;
 
-    bufaddr = kzalloc(16,GFP_KERNEL);
-    memset(bufaddr,0x12345678,4);
-    printk("client:0x%x \n",*(int *)bufaddr);
-    cb->send_buf.buf = bufaddr;
-    cb->send_buf.size = 16;
-    cb->rdma_mr  = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
+    // bufaddr = kzalloc(16,GFP_KERNEL);
+    // memset(bufaddr,0x12345678,4);
+    // printk("client:0x%x \n",*bufaddr);
+    
+    cb->send_buf.size   = 16;
+    cb->send_buf.buf = ib_dma_alloc_coherent(ibpd,cb->send_buf.size,&cb->send_dma_addr,GFP_KERNEL);
+    if(!cb->send_buf.buf){
+        printk("dealloc failed \n");
+        ret = -ENOMEM;
+        goto error2;
+    }
+    memset((void *)cb->send_buf.buf,"hello",5);
+    printk("send buf: %s \n",*cb->send_buf.buf);
+    cb->page_list_len   = (((cb->size - 1) & PAGE_MASK) + PAGE_SIZE)>> PAGE_SHIFT;
+    cb->rdma_mr         = ib_alloc_mr(cb->pd, IB_MR_TYPE_MEM_REG,cb->page_list_len);
+
+    // cb->send_buf.buf = bufaddr;
+    // cb->send_buf.size = 16;
+    // cb->rdma_mr  = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
     if(IS_ERR(cb->rdma_mr)){
             printk("rdma mr wrong \n");
             ret = PTR_ERR(cb->rdma_mr);
@@ -836,17 +859,17 @@ static void krdma_run_client(struct krdma_cb *cb)
     cb->rdma_mr->device     = ibpd->device;
     cb->rdma_mr->pd         = ibpd;
     cb->rdma_mr->uobject    = NULL;
-    atomic_inc(&ibpd->usecnt);
+    //atomic_inc(&ibpd->usecnt);
     cb->rdma_mr->need_inval = false;
     cb->send_buf.rkey       = cb->rdma_mr->rkey; // get rkey
     cb->send_buf.lkey       = cb->rdma_mr->lkey;
 
-    cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
-    if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
-    {
-            printk("mapping error \n");
-            goto error4;
-    }
+    // cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
+    // if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
+    // {
+    //         printk("mapping error \n");
+    //         goto error4;
+    // }
     printk("create rs success end \n");
 
     printk("start to exchange info with server \n");
