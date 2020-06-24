@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
 	}
 	
 	if(servername == NULL)
-	{printf("sorry, client and server all need ipaddr to bind.server need local addr\n");}
+	{printf("sorry, client and server all need ipaddr to bind.server need local addr\n");return 1;}
 	printf("check param...  \n");
 	printf("port : 0x%x \n", port);
 	printf("ib_port: 0x%x \n", ib_port);
