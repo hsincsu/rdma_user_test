@@ -228,7 +228,7 @@ int main(int argc, char *argv[])
 						{ .name = "ib-dev",	  .has_arg = 1, .val = 'd' },
                         {}
                 };
-		 c = getopt_long(argc,argv,"p:i:s:g:c:",long_options,NULL);
+		 c = getopt_long(argc,argv,"p:i:s:g:c:d:",long_options,NULL);
 
 		 if(c == -1)
 		 	break;
@@ -309,7 +309,7 @@ int main(int argc, char *argv[])
                 }
         }
 	
-	
+
 
 	ctx1 = calloc(1,sizeof *ctx1);
 
