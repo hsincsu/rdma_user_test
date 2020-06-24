@@ -83,7 +83,7 @@ static void usage(const char *argv0)
 		printf("  -d, --ib-dev=<str> 	 ib_device 's name that you 'll use\n");
         printf("  -s, --size=<size>      size of message to exchange (default 4096)\n");
         printf("  -g, --gid-idx=<gid index> local port gid index\n");
-		printf("  -c, --client=(0/1)	 0-for server mode(default), 1-for client mode");
+		printf("  -c, --client=(0/1)	 0-for server mode(default), 1-for client mode\n");
 }
 
 int start_my_server(struct pingpong_context *ctx,char *send_buf,int sendsize ,char *recv_buf,int recvsize)
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
 	ctx1->buf 		 = memalign(page_size, size);
 	ctx1->size 		 = size;
 	memcpy(ctx1->buf,"hello,world",12);
-	printf("buf: 0x%s \n",ctx1->buf);
+	printf("buf: %s \n",ctx1->buf);
 
 	printf("dwcrdma-user:ibv_open_device \n");
     ctx1->context = ibv_open_device(ib_dev);
@@ -508,7 +508,7 @@ if(ctx1->client == 1)
 		return 1;
 	}
 
-
+	printf("buf: %s \n",ctx1->buf);
 
 
 clean_qp:
