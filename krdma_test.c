@@ -524,6 +524,7 @@ static void krdma_run_server(struct krdma_cb *cb)
 
     //bufaddr             = kzalloc(16,GFP_KERNEL);
     //cb->send_buf.buf    = bufaddr;
+    printk("start to alloc dma buf\n");
     cb->send_buf.size   = 1024;
     cb->send_buf.buf = ib_dma_alloc_coherent(ibpd,cb->send_buf.size,&cb->send_dma_addr,GFP_KERNEL);
     if(!cb->send_buf.buf){
@@ -531,6 +532,8 @@ static void krdma_run_server(struct krdma_cb *cb)
         ret = -ENOMEM;
         goto error2;
     }
+
+    printk("end of alloc dma buf \n");
     cb->page_list_len   = (((cb->size - 1) & PAGE_MASK) + PAGE_SIZE)>> PAGE_SHIFT;
     cb->rdma_mr         = ib_alloc_mr(cb->pd, IB_MR_TYPE_MEM_REG,cb->page_list_len);
     if(IS_ERR(cb->rdma_mr)){
@@ -834,7 +837,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     // bufaddr = kzalloc(16,GFP_KERNEL);
     // memset(bufaddr,0x12345678,4);
     // printk("client:0x%x \n",*bufaddr);
-    
+     printk("start to alloc dma buf\n");
     cb->send_buf.size   = 1024;
     cb->send_buf.buf = ib_dma_alloc_coherent(ibpd,cb->send_buf.size,&cb->send_dma_addr,GFP_KERNEL);
     if(!cb->send_buf.buf){
@@ -844,6 +847,9 @@ static void krdma_run_client(struct krdma_cb *cb)
     }
     memset((void *)cb->send_buf.buf,"hello",5);
     printk("send buf: %s \n",*cb->send_buf.buf);
+    
+     printk("endto alloc dma buf\n");
+    
     cb->page_list_len   = (((cb->size - 1) & PAGE_MASK) + PAGE_SIZE)>> PAGE_SHIFT;
     cb->rdma_mr         = ib_alloc_mr(cb->pd, IB_MR_TYPE_MEM_REG,cb->page_list_len);
 
