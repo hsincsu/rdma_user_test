@@ -99,7 +99,7 @@ int start_my_server(struct pingpong_context *ctx,char *send_buf,int sendsize ,ch
 		memset(&clienaddr,0,sizeof(clienaddr));
 		clienaddr.sin_family = AF_INET;
 		clienaddr.sin_port 	 = htons(ctx->port);
-		clienaddr.sin_addr.s_addr = in_aton(ctx->servername);
+		clienaddr.sin_addr.s_addr = inet_addr(ctx->servername);
 
 		if(bind(sockfd,(struct sockaddr *)&clienaddr,sizeof(clienaddr)) == -1)
 		{
