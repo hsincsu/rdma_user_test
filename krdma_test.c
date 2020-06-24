@@ -482,7 +482,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     ibdev = cb->cm_id->device;
 
     //before socket, create some res.
-    ibpd = ib_alloc_pd(ibdev,0);
+    ibpd = ib_alloc_pd(ibdev,IB_PD_UNSAFE_GLOBAL_RKEY);
     if(IS_ERR(ibpd)){
             printk("pd wrong\n");
             ret = PTR_ERR(ibpd);
@@ -535,21 +535,9 @@ static void krdma_run_server(struct krdma_cb *cb)
     }
 
     cb->page_list_len   = (((cb->size - 1) & PAGE_MASK) + PAGE_SIZE)>> PAGE_SHIFT;
-    cb->rdma_mr  = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
-    if(IS_ERR(cb->rdma_mr)){
-            printk("rdma mr wrong \n");
-            ret = PTR_ERR(cb->rdma_mr);
-            goto error3;
-    }
-
-     cb->rdma_mr->device     = ibpd->device;
-     cb->rdma_mr->pd         = ibpd;
-     cb->rdma_mr->uobject    = NULL;
-     atomic_inc(&ibpd->usecnt);
-    cb->rdma_mr->need_inval = false;
-
-    cb->send_buf.rkey       = cb->rdma_mr->rkey; // get rkey
-    cb->send_buf.lkey       = cb->rdma_mr->lkey;
+    
+    cb->send_buf.rkey       = ibpd->unsafe_global_rkey; // get rkey
+    cb->send_buf.lkey       = ibpd->local_dma_lkey;
 
     printk("create rs success end \n");
     printk("start to exchange qpinfo with client \n");
@@ -783,7 +771,7 @@ static void krdma_run_client(struct krdma_cb *cb)
 
     ibdev = cb->cm_id->device;
 
-    ibpd = ib_alloc_pd(ibdev,0);
+    ibpd = ib_alloc_pd(ibdev,IB_PD_UNSAFE_GLOBAL_RKEY);
     if(IS_ERR(ibpd)){
             printk("pd wrong\n");
             ret = PTR_ERR(ibpd);
@@ -840,24 +828,8 @@ static void krdma_run_client(struct krdma_cb *cb)
             goto error4;
     }
     cb->page_list_len   = (((cb->size - 1) & PAGE_MASK) + PAGE_SIZE)>> PAGE_SHIFT;
-    //cb->rdma_mr         = ib_alloc_mr(cb->pd, IB_MR_TYPE_MEM_REG,cb->page_list_len);
-    // cb->send_buf.buf = bufaddr;
-    // cb->send_buf.size = 16;
-     cb->rdma_mr  = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
-    if(IS_ERR(cb->rdma_mr)){
-            printk("rdma mr wrong \n");
-            ret = PTR_ERR(cb->rdma_mr);
-            goto error3;
-    }
-
-     cb->rdma_mr->device     = ibpd->device;
-     cb->rdma_mr->pd         = ibpd;
-     cb->rdma_mr->uobject    = NULL;
-     atomic_inc(&ibpd->usecnt);
-    cb->rdma_mr->need_inval = false;
-    
-    cb->send_buf.rkey       = cb->rdma_mr->rkey; // get rkey
-    cb->send_buf.lkey       = cb->rdma_mr->lkey;
+    cb->send_buf.rkey       = ibpd->unsafe_global_rkey; // get rkey
+    cb->send_buf.lkey       = ibpd->local_dma_lkey;
     printk("create rs success end \n");
 
     printk("start to exchange info with server \n");
@@ -1032,7 +1004,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     memset(&sg1,0,sizeof(sg1));
     sg1.addr =(uintptr_t)cb->send_dma_addr;
     sg1.length = cb->send_buf.size;
-    sg1.lkey = ibpd->local_dma_lkey;
+    sg1.lkey = cb->send_buf.lkey;
 
      memset(&wr1,0,sizeof(wr1));
      wr1.wr.wr_id =1;
