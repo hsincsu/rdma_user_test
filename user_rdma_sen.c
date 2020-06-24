@@ -408,7 +408,6 @@ else
 	attr.ah_attr.is_global		= 1,
     attr.ah_attr.sl             = 0;
     attr.ah_attr.port_num       = ctx1->ib_port;
-    attr.ah_attr.ah_flags       = IB_AH_GRH;
 	attr.ah_attr.grh.dgid		= qpinfo_r->gid;
 	attr.ah_attr.grh.hop_limit  = 1;
     attr.ah_attr.grh.sgid_index = ctx1->gidx;
@@ -462,8 +461,8 @@ if(ctx1->client == 1)
 	wr.num_sge		=   1;
 	wr.opcode		=   IBV_WR_RDMA_WRITE;
 	wr.send_flags 	= 	IBV_SEND_SIGNALED;
-	wr.rdma.remote_addr = qpinfo_r->addr.remote_addr;
-	wr.rdma.rkey	= 	qpinfo_r->addr.rkey;
+	wr.wr.rdma.remote_addr = qpinfo_r->addr.remote_addr;
+	wr.wr.rdma.rkey	= 	qpinfo_r->addr.rkey;
 
 	if(ibv_post_send(ctx1->qp,&wr,bad_wr))
 	{
