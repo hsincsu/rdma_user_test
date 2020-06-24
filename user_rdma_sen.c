@@ -384,7 +384,7 @@ if(ctx1->client == 1){
 }
 else
 {
-	start_my_client(ctx1,(char *)qpinfo,qpinfosize,(char *)qpinfo_r,qpinfosize);
+	start_my_server(ctx1,(char *)qpinfo,qpinfosize,(char *)qpinfo_r,qpinfosize);
 	printf("client's qpinfo : \n");
     printf("client: qpn:0x %d \n",qpinfo_r->qpn);
     printf("client: qkey:0x %d \n",qpinfo_r->qkey);
