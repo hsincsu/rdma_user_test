@@ -528,11 +528,12 @@ static void krdma_run_server(struct krdma_cb *cb)
     cb->send_buf.size   = 16;
     printk("end of alloc dma buf \n");
     cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
-    if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
+    if(ib_dma_mapping_error(ibdev,cb->send_dma_addr) != 0)
     {
             printk("mapping error \n");
             goto error4;
     }
+
     cb->page_list_len   = (((cb->size - 1) & PAGE_MASK) + PAGE_SIZE)>> PAGE_SHIFT;
     cb->rdma_mr  = ibdev->ops.get_dma_mr(ibpd,IB_ACCESS_REMOTE_READ|IB_ACCESS_REMOTE_WRITE|IB_ACCESS_LOCAL_WRITE);
     if(IS_ERR(cb->rdma_mr)){
@@ -833,7 +834,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     
      printk("endto alloc dma buf\n");
      cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
-    if(ib_dma_mapping_error(ibdev,cb->send_dma_addr))
+    if(ib_dma_mapping_error(ibdev,cb->send_dma_addr) != 0)
     {
             printk("mapping error \n");
             goto error4;
