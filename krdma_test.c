@@ -721,7 +721,7 @@ static void krdma_run_server(struct krdma_cb *cb)
 error4:
     kfree(bufaddr);
 error3:
-    ib_dereg_mr(cb->rdma_mr);
+    //ib_dereg_mr(cb->rdma_mr);
 error2:
     ib_destroy_qp(ibqp);
 error1:
@@ -1038,7 +1038,7 @@ static void krdma_run_client(struct krdma_cb *cb)
 error4:
     kfree(bufaddr);
 error3:
-    ib_dereg_mr(cb->rdma_mr);
+    //ib_dereg_mr(cb->rdma_mr);
 error2:
     ib_destroy_qp(ibqp);
 error1:
