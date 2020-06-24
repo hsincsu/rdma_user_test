@@ -811,11 +811,11 @@ static void krdma_run_client(struct krdma_cb *cb)
     }
     cb->qp = ibqp;
 
-      bufaddr = kzalloc(500,GFP_KERNEL);
+    bufaddr = kzalloc(16,GFP_KERNEL);
     // memset(bufaddr,0x12345678,4);
     // printk("client:0x%x \n",*bufaddr);
      printk("start to alloc dma buf\n");
-    cb->send_buf.size   = 500;
+    cb->send_buf.size   = 16;
     cb->send_buf.buf    = bufaddr;
     memcpy(cb->send_buf.buf,"hello",5);
     printk("send buf: %s \n",cb->send_buf.buf);
