@@ -541,11 +541,11 @@ static void krdma_run_server(struct krdma_cb *cb)
 
     printk("reg rkey:0x%x, page_list_len %u\n",cb->rdma_mr->rkey,cb->page_list_len);
 
-    cb->rdma_mr->device     = ibpd->device;
-    cb->rdma_mr->pd         = ibpd;
-    cb->rdma_mr->uobject    = NULL;
+    // cb->rdma_mr->device     = ibpd->device;
+    // cb->rdma_mr->pd         = ibpd;
+    // cb->rdma_mr->uobject    = NULL;
 
-    cb->rdma_mr->need_inval = false;
+    // cb->rdma_mr->need_inval = false;
     cb->send_buf.rkey       = cb->rdma_mr->rkey; // get rkey
     cb->send_buf.lkey       = cb->rdma_mr->lkey;
 
@@ -856,10 +856,10 @@ static void krdma_run_client(struct krdma_cb *cb)
             goto error3;
     }
 
-    cb->rdma_mr->device     = ibpd->device;
-    cb->rdma_mr->pd         = ibpd;
-    cb->rdma_mr->uobject    = NULL;
-    //atomic_inc(&ibpd->usecnt);
+    // cb->rdma_mr->device     = ibpd->device;
+    // cb->rdma_mr->pd         = ibpd;
+    // cb->rdma_mr->uobject    = NULL;
+    // //atomic_inc(&ibpd->usecnt);
     cb->rdma_mr->need_inval = false;
     cb->send_buf.rkey       = cb->rdma_mr->rkey; // get rkey
     cb->send_buf.lkey       = cb->rdma_mr->lkey;
