@@ -35,7 +35,7 @@ struct pingpong_context {
         struct ibv_pd           *pd;
         struct ibv_mr           *mr;
         struct ibv_dm           *dm;
-		union  ibv_gid			*gid;
+		union  ibv_gid			gid;
 		char 					*servername;
 		unsigned int 			port;
 		int 	  				ib_port;
@@ -354,7 +354,7 @@ int main(int argc, char *argv[])
                   }
 	printf("modify qp init success\n");
 
-	ret = ibv_query_gid(ctx1->context, ib_port, gidx, ctx1->gid);
+	ret = ibv_query_gid(ctx1->context, ib_port, gidx, &ctx1->gid);
 
 	printf("query gid success\n");
 
