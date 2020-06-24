@@ -744,7 +744,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     //add src gid attr
     struct ib_gid_attr src_gid_attr;
     src_gid_attr.device      = ibdev;
-    src_gid_attr.ndev        = ibdev.ops.get_netdev(ibdev,1);
+    src_gid_attr.ndev        = ibdev->ops.get_netdev(ibdev,1);
     src_gid_attr.gid         = qpinfo->gid;
     src_gid_attr.gid_type    = IB_GID_TYPE_ROCE_UDP_ENCAP;
     src_gid_attr.index       = 2;
@@ -1047,7 +1047,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     //add src gid attr
     struct ib_gid_attr src_gid_attr;
     src_gid_attr.device      = ibdev;
-    src_gid_attr.ndev        = ibdev.ops.get_netdev(ibdev,1);
+    src_gid_attr.ndev        = ibdev->ops.get_netdev(ibdev,1);
     src_gid_attr.gid         = qpinfo->gid;
     src_gid_attr.gid_type    = IB_GID_TYPE_ROCE_UDP_ENCAP;
     src_gid_attr.index       = 2;
