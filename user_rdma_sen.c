@@ -80,6 +80,7 @@ static void usage(const char *argv0)
         printf("Options:\n");
         printf("  -p, --port=<port>      listen on/connect to port <port> (default 18515)\n");
         printf("  -i, --ib-port=<port>   use port <port> of IB device (default 1)\n");
+		printf("  -d, --ib-dev=<str> 	 ib_device 's name that you 'll use\n");
         printf("  -s, --size=<size>      size of message to exchange (default 4096)\n");
         printf("  -g, --gid-idx=<gid index> local port gid index\n");
 		printf("  -c, --client=(0/1)	 0-for server mode(default), 1-for client mode");
@@ -214,6 +215,7 @@ int main(int argc, char *argv[])
 	int       	 gidx = 2;
 	int 		client= 0;
 	char  *servername = NULL;
+	char  *ib_devname = NULL;
 
 	while(1){
 		 int c;
@@ -223,6 +225,7 @@ int main(int argc, char *argv[])
                         { .name = "size",     .has_arg = 1, .val = 's' },
                         { .name = "gid-idx",  .has_arg = 1, .val = 'g' },
 						{ .name = "client",   .has_arg = 1, .val = 'c' },
+						{ .name = "ib-dev",	  .has_arg = 1, .val = 'd' },
                         {}
                 };
 		 c = getopt_long(argc,argv,"p:i:s:g:c:",long_options,NULL);
@@ -256,6 +259,9 @@ int main(int argc, char *argv[])
 			 		client = strtoul(optarg,NULL,0);
 					printf("client: 0x%x\n",client);
 					break;
+			 case 'd':
+					ib_devname = strdupa(optarg);
+					break;
 			 default:
 			 		usage(argv[0]);
 					 return 1;
@@ -286,14 +292,24 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	ib_dev = *dev_list;
-	if(!ib_dev)
-	{
-		printf("dwcrdma-user: ib_dev null \n");
-	}
+	if (!ib_devname) {
+                ib_dev = *dev_list;
+                if (!ib_dev) {
+                        fprintf(stderr, "No IB devices found\n");
+                        return 1;
+                }
+        } else {
+                for (i = 0; dev_list[i]; ++i)
+                        if (!strcmp(ibv_get_device_name(dev_list[i]), ib_devname))
+                                break;
+                ib_dev = dev_list[i];
+                if (!ib_dev) {
+                        fprintf(stderr, "IB device %s not found\n", ib_devname);
+                        return 1;
+                }
+        }
 	
 	
-
 
 	ctx1 = calloc(1,sizeof *ctx1);
 
