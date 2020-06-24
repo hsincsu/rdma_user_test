@@ -216,7 +216,7 @@ int main(int argc, char *argv[])
 	ret = ibv_query_gid(ctx1->context, ib_port, gidx, ctx1->gid);
 
 
-
+clean_qp:
 	ibv_destroy_qp(ctx1->qp);
 	ibv_destroy_cq(ctx1->cq_s.cq);
 	ibv_dereg_mr(ctx1->mr);
