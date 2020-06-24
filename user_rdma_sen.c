@@ -36,26 +36,96 @@ struct pingpong_context {
         uint64_t                 completion_timestamp_mask;
 };
 
+struct addr_info{
+		char *remote_addr;
+		uint64_t size;
+		uint64_t rkey;
+};
 
-struct pingpong_context *ctx1;
-struct pingpong_context *ctx2;
-struct ibv_pd *pd1;
-struct ibv_pd *pd2;
-struct ibv_cq *cq1;
-struct ibv_cq *cq2;
-struct ibv_mr *mr1;
-struct ibv_mr *mr2;
-struct ibv_qp *qp1;
-struct ibv_qp *qp2;
+struct qp_info{
+		uint32_t qpn;
+		uint32_t qkey;
+		uint32_t pkey;
+		union ibv_gid gid;
+		//uint8_t dmac[6];
+		struct addr_info addr;	
+};
+
 
 
 int main(int argc, char *argv[])
 {
 	struct ibv_device      **dev_list;
-        struct ibv_device       *ib_dev;
+    struct ibv_device       *ib_dev;
+	struct pingpong_context  *ctx1;
 	static int page_size;
-	int size = 4096;
-	int access_flags = IBV_ACCESS_LOCAL_WRITE;
+	//int size = 4096;
+	int access_flags = IBV_ACCESS_REMOTE_READ|IBV_ACCESS_REMOTE_WRITE|IBV_ACCESS_LOCAL_WRITE;
+	int ret = 0;
+
+	//get opt
+	unsigned int port = 8888;
+	int 	  ib_port = 1;
+	unsigned int size = 4096;
+	int       	 gidx = 2;
+	char  *servername = NULL;
+
+	while(1){
+		 int c;
+		 static struct option long_options[] = {
+                        { .name = "port",     .has_arg = 1, .val = 'p' },
+                        { .name = "ib-port",  .has_arg = 1, .val = 'i' },
+                        { .name = "size",     .has_arg = 1, .val = 's' },
+                        { .name = "gid-idx",  .has_arg = 1, .val = 'g' },
+                        {}
+                };
+		 c = getopt_long(argc,argv,"p:i:s:g",long_options,NULL);
+
+		 if(c == -1)
+		 	break;
+		 
+		 switch(c){
+			 case 'p':
+			 		port = strtoul(optarg, NULL, 0);
+					if(port > 65535){
+						 usage(argv[0]);
+						 return 1;
+					}
+					break;
+		 	 case 'i':
+			  		ib_port = strtol(optarg, NULL, 0);
+					  if(ib_port < 1){
+						  usage(argv[0]);
+						  return 1;
+					  }
+					  break;
+			 case 's':
+			 		size = strtoul(optarg, NULL, 0);
+					 break;
+			 case 'g':
+			 		gidx = strtol(optarg, NULL, 0);
+					 break;
+			 default:
+			 		usage(argv[0]);
+					 return 1;
+		 }
+
+	}
+
+	if(optind == argc - 1)
+			servername = strdupa(argv[optind]);
+	else if (optind < argc){
+			usage(argv[0]);
+			return 1;
+	}
+
+	printf("check param...  \n");
+	printf("port : 0x%x \n", port);
+	printf("ib_port: 0x%x \n", ib_port);
+	printf("size: 0x%x \n",size);
+	printf("gidx: 0x%x \n",gidx);
+	printf("servername: %s\n",servername);
+
 
 	dev_list = ibv_get_device_list(NULL);
 	if(!dev_list){
@@ -69,29 +139,37 @@ int main(int argc, char *argv[])
 		printf("dwcrdma-user: ib_dev null \n");
 	}
 	
+	
+
+
 	ctx1 = calloc(1,sizeof *ctx1);
-	ctx2 = calloc(1,sizeof *ctx2);
 	page_size = sysconf(_SC_PAGESIZE);
 	ctx1->buf = memalign(page_size, size);
-	memset(ctx1->buf, 0x7b, size);
+
+	memcpy(ctx1->buf,"hello,world",12);
+	printk("buf: 0x%s \n",ctx1->buf);
+
 	printf("dwcrdma-user:ibv_open_device \n");
-        ctx1->context = ibv_open_device(ib_dev);
+    ctx1->context = ibv_open_device(ib_dev);
 
         
 	printf("dwcrdma-user:oepn success \n");
 	ctx1->pd = ibv_alloc_pd(ctx1->context);
+
 	printf("dwcrdma-user:alloc pd success \n");		
 	ctx1->mr = ibv_reg_mr(ctx1->pd, ctx1->buf, size, access_flags);
+
 	printf("dwcrdma-user:reg mr success \n");
 	ctx1->cq_s.cq = ibv_create_cq(ctx1->context,100, NULL,NULL,0);
+
 	printf("dwcrdma-user:create_cq success\n");
 	struct ibv_qp_attr attr;
                 struct ibv_qp_init_attr init_attr = {
                         .send_cq = ctx1->cq_s.cq,
                         .recv_cq = ctx1->cq_s.cq,
                         .cap     = {
-                                .max_send_wr  = 1,
-                                .max_recv_wr  = 99,
+                                .max_send_wr  = 10,
+                                .max_recv_wr  = 10,
                                 .max_send_sge = 1,
                                 .max_recv_sge = 1
                         },
@@ -99,15 +177,31 @@ int main(int argc, char *argv[])
                 };
 	ctx1->qp = ibv_create_qp(ctx1->pd, &init_attr);
 	printf("dwcrdma-user: create qp success \n");
-	
+
+	//alloc buf
+	struct qp_info *qpinfo = NULL;
+    struct qp_info *qpinfo_c = NULL;
+    int size = sizeof(*qpinfo);
+    qpinfo_c = kmalloc(sizeof(*qpinfo_c),GFP_KERNEL);
+    qpinfo = kmalloc(sizeof(*qpinfo),GFP_KERNEL);
+    memset(qpinfo,0,sizeof(*qpinfo));
+    memset(qpinfo_c,0,sizeof(*qpinfo_c));
+
+	qpinfo->qpn = ctx1->qp->qp_num;
+	qpinfo->qkey = 0;
+	qpinfo->pkey = 0;
+
+
+
     struct ibv_qp_attr attr3 = {
 			.qp_state        = IBV_QPS_INIT,
 			.pkey_index      = 0,
-			.port_num        = port,
-			.qp_access_flags = 0
+			.port_num        = 1,
+			.qp_access_flags = IBV_ACCESS_REMOTE_WRITE | IBV_ACCESS_REMOTE_READ |
+                              IBV_ACCESS_LOCAL_WRITE | IBV_ACCESS_REMOTE_ATOMIC;
 		};
 
-    if (ibv_modify_qp(ctx->qp, &attr,
+    if (ibv_modify_qp(ctx1->qp, &attr,
 				  IBV_QP_STATE              |
 				  IBV_QP_PKEY_INDEX         |
 				  IBV_QP_PORT               |
@@ -115,8 +209,12 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "Failed to modify QP to INIT\n");
             goto clean_qp;
                   }
+	printf("modify qp init success\n");
 
-                  
+	union ibv_gid gid;
+	ret = ibv_query_gid(ctx1->context, )
+
+
 
 	int i;
 again:	printf("please enter!");
