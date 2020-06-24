@@ -312,7 +312,6 @@ int main(int argc, char *argv[])
 
 
 	ctx1 = calloc(1,sizeof *ctx1);
-
 	ctx1->port 		 = port;
 	ctx1->ib_port 	 = ib_port;
 	ctx1->gidx 		 = gidx;
@@ -321,7 +320,9 @@ int main(int argc, char *argv[])
 	page_size 		 = sysconf(_SC_PAGESIZE);
 	ctx1->buf 		 = memalign(page_size, size);
 	ctx1->size 		 = size;
+	if(ctx1->client == 1)
 	memcpy(ctx1->buf,"hello,world",12);
+	
 	printf("buf: %s \n",ctx1->buf);
 
 	printf("dwcrdma-user:ibv_open_device \n");
