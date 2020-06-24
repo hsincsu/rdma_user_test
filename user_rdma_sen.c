@@ -451,7 +451,7 @@ if(ctx1->client == 1)
 	struct ibv_send_wr *bad_wr;
 
 	memset(&list,0,sizeof(list));
-	list.addr 	=  ctx1->buf;
+	list.addr 	=  (uintptr_t)ctx1->buf;
 	list.length	=  ctx1->size;
 	list.lkey	=  ctx1->mr->lkey;
 
@@ -461,7 +461,7 @@ if(ctx1->client == 1)
 	wr.num_sge		=   1;
 	wr.opcode		=   IBV_WR_RDMA_WRITE;
 	wr.send_flags 	= 	IBV_SEND_SIGNALED;
-	wr.wr.rdma.remote_addr = qpinfo_r->addr.remote_addr;
+	wr.wr.rdma.remote_addr = (uintptr_t)qpinfo_r->addr.remote_addr;
 	wr.wr.rdma.rkey	= 	qpinfo_r->addr.rkey;
 
 	if(ibv_post_send(ctx1->qp,&wr,&bad_wr))
