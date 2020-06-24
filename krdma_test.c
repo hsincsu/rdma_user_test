@@ -829,8 +829,8 @@ static void krdma_run_client(struct krdma_cb *cb)
      printk("start to alloc dma buf\n");
     cb->send_buf.size   = 16;
     cb->send_buf.buf    = bufaddr;
-    memset((void *)cb->send_buf.buf,"hello",5);
-    printk("send buf: %s \n",*cb->send_buf.buf);
+    memcpy(cb->send_buf.buf,"hello",5);
+    printk("send buf: %s \n",cb->send_buf.buf);
     
      printk("endto alloc dma buf\n");
      cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
