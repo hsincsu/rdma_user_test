@@ -265,7 +265,8 @@ int main(int argc, char *argv[])
 			return 1;
 	}
 	
-
+	if(servername == NULL)
+	{printf("sorry, client and server all need ipaddr to bind.server need local addr\n");}
 	printf("check param...  \n");
 	printf("port : 0x%x \n", port);
 	printf("ib_port: 0x%x \n", ib_port);
@@ -350,6 +351,7 @@ int main(int argc, char *argv[])
 
 	ret = ibv_query_gid(ctx1->context, ib_port, gidx, ctx1->gid);
 
+	printf("query gid success\n");
 
 	struct qp_info *qpinfo = NULL;
     struct qp_info *qpinfo_r = NULL;
@@ -359,9 +361,6 @@ int main(int argc, char *argv[])
     memset(qpinfo,0,sizeof(*qpinfo));
     memset(qpinfo_r,0,sizeof(*qpinfo_r));
 
-
-
-
 	qpinfo->qpn = ctx1->qp->qp_num;
 	qpinfo->qkey = 0;
 	qpinfo->pkey = 0;
@@ -369,6 +368,8 @@ int main(int argc, char *argv[])
 	qpinfo->addr.size 		 = ctx1->size;
 	qpinfo->addr.rkey		 = ctx1->mr->rkey;
 	memcpy(&qpinfo->gid,ctx1->gid,sizeof(union ibv_gid));
+
+	printf("start socket\n");
 if(ctx1->client == 1){
 	start_my_client(ctx1,(char *)qpinfo,qpinfosize,(char *)qpinfo_r,qpinfosize);
 	printf("server's qpinfo : \n");
