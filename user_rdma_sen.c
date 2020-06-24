@@ -1,4 +1,4 @@
-#include <config.h>
+//#include <config.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,6 +15,19 @@
 #include <inttypes.h>
 
 #include <infiniband/verbs.h>
+
+#define strdupa(_s)                                             \
+({                                                              \
+        char *_d;                                               \
+        int _len;                                               \
+                                                                \
+        _len = strlen(_s) + 1;                                  \
+        _d = alloca(_len);                                      \
+        if (_d)                                                 \
+                memcpy(_d, _s, _len);                           \
+        _d;                                                     \
+})   
+
 
 struct pingpong_context { 
         struct ibv_context      *context;
