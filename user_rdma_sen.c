@@ -372,7 +372,7 @@ int main(int argc, char *argv[])
 	qpinfo->addr.remote_addr = ctx1->buf;
 	qpinfo->addr.size 		 = ctx1->size;
 	qpinfo->addr.rkey		 = ctx1->mr->rkey;
-	memcpy(&qpinfo->gid,ctx1->gid,sizeof(union ibv_gid));
+	memcpy(&qpinfo->gid,&ctx1->gid,sizeof(union ibv_gid));
 
 	printf("start socket\n");
 if(ctx1->client == 1){
