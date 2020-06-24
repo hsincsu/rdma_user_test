@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
                         { .name = "gid-idx",  .has_arg = 1, .val = 'g' },
                         {}
                 };
-		 c = getopt_long(argc,argv,"p:i:s:g",long_options,NULL);
+		 c = getopt_long(argc,argv,"p:i:s:g:",long_options,NULL);
 
 		 if(c == -1)
 		 	break;
