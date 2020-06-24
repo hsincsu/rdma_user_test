@@ -1,5 +1,6 @@
 #include <linux/version.h>
 #include <linux/module.h>
+#include <linux/dma-mapping>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
 #include<linux/socket.h>
@@ -524,7 +525,7 @@ static void krdma_run_server(struct krdma_cb *cb)
 
     //bufaddr             = kzalloc(16,GFP_KERNEL);
     //cb->send_buf.buf    = bufaddr;
-    cb->send_buf.size   = 16;
+    cb->send_buf.size   = 1024;
     cb->send_buf.buf = ib_dma_alloc_coherent(ibpd,cb->send_buf.size,&cb->send_dma_addr,GFP_KERNEL);
     if(!cb->send_buf.buf){
         printk("dealloc failed \n");
@@ -835,7 +836,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     // memset(bufaddr,0x12345678,4);
     // printk("client:0x%x \n",*bufaddr);
     
-    cb->send_buf.size   = 16;
+    cb->send_buf.size   = 1024;
     cb->send_buf.buf = ib_dma_alloc_coherent(ibpd,cb->send_buf.size,&cb->send_dma_addr,GFP_KERNEL);
     if(!cb->send_buf.buf){
         printk("dealloc failed \n");
