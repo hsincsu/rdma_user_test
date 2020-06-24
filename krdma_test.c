@@ -199,7 +199,7 @@ struct krdma_cb{
         struct list_head list;
 
 };
-
+#if 0
 enum gid_table_entry_state {
         GID_TABLE_ENTRY_INVALID         = 1,
         GID_TABLE_ENTRY_VALID           = 2,
@@ -266,7 +266,7 @@ struct ib_gid_attr *rdma_find_gid_by_device(struct ib_device *ibdev, union ib_gi
             return res;
 }
 
-
+#endif
 
 int ib_resolve_eth_dmac(struct ib_device* ibdev,struct ib_qp_attr *qp_attr, int *qp_attr_mask)
 {
@@ -745,8 +745,8 @@ static void krdma_run_server(struct krdma_cb *cb)
     struct ib_gid_attr src_gid_attr;
     src_gid_attr.device      = ibdev;
     src_gid_attr.ndev        = ibdev.ops.get_netdev(ibdev,1);
-    src_gid_attr.ib_gid      = qpinfo->gid;
-    src_gid_attr.ib_gid_type = IB_GID_TYPE_ROCE_UDP_ENCAP;
+    src_gid_attr.gid         = qpinfo->gid;
+    src_gid_attr.gid_type    = IB_GID_TYPE_ROCE_UDP_ENCAP;
     src_gid_attr.index       = 2;
     src_gid_attr.port_num    = 1;
     attr.ah_attr.grh.sgid_attr = &src_gid_attr;
@@ -1048,8 +1048,8 @@ static void krdma_run_client(struct krdma_cb *cb)
     struct ib_gid_attr src_gid_attr;
     src_gid_attr.device      = ibdev;
     src_gid_attr.ndev        = ibdev.ops.get_netdev(ibdev,1);
-    src_gid_attr.ib_gid      = qpinfo->gid;
-    src_gid_attr.ib_gid_type = IB_GID_TYPE_ROCE_UDP_ENCAP;
+    src_gid_attr.gid         = qpinfo->gid;
+    src_gid_attr.gid_type    = IB_GID_TYPE_ROCE_UDP_ENCAP;
     src_gid_attr.index       = 2;
     src_gid_attr.port_num    = 1;
     attr.ah_attr.grh.sgid_attr = &src_gid_attr;
