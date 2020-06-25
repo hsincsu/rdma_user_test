@@ -1049,7 +1049,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     src_gid_attr.device      = ibdev;
     src_gid_attr.ndev        = ibdev->ops.get_netdev(ibdev,1);
     src_gid_attr.gid         = qpinfo->gid;
-    src_gid_attr.gid_type    = IB_GID_TYPE_ROCE_UDP_ENCAP;
+    src_gid_attr.gid_type    = IB_GID_TYPE_ROCE|IB_GID_TYPE_ROCE_UDP_ENCAP;
     src_gid_attr.index       = 2;
     src_gid_attr.port_num    = 1;
     attr.ah_attr.grh.sgid_attr = &src_gid_attr;

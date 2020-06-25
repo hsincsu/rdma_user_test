@@ -1,0 +1,1 @@
+gcc cm_send.c -o cmsend

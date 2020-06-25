@@ -1,5 +1,18 @@
 //#include <config.h>
 
+/*this file is not used right now ,my alter it later. but now function is not completed*/
+
+
+
+
+
+
+
+
+
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

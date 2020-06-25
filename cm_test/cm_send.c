@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     int choose;
 
 while(1){
-    printf("welcome to debug sys in sysfs(later change to debugfs):");
+    printf("welcome to debug sys in sysfs(later change to debugfs):\n");
     printf("1. CM SEND\n");
     printf("2. CM RECV\n");
     printf("3. PRINT MAC(use dmesg to check)\n");
