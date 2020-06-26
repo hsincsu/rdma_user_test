@@ -740,7 +740,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     attr.ah_attr.grh.dgid       = qpinfo_c->gid;
     attr.ah_attr.grh.hop_limit  = 1;
     attr.ah_attr.grh.sgid_index = 2;
-    memcpy(attr.ah_attr.roce.dmac,qpinfo_c->dmac,6);
+    //memcpy(attr.ah_attr.roce.dmac,qpinfo_c->dmac,6);
     //add src gid attr
     struct ib_gid_attr src_gid_attr;
     src_gid_attr.device      = ibdev;
@@ -821,7 +821,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         printk("send buf: 0x%x \n",*cb->send_buf.buf);
         }
         else
-        {printk("Failur: %d \n",wc.status);goto error4;}//added by h
+        {printk("Failur: %d \n",wc1.status);goto error4;}//added by h
         }
 
     
@@ -1163,7 +1163,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     if(wc1.status ==IB_WC_SUCCESS)
             printk("Successful \n");//added by hs           
     else
-        {printk("Failur: %d \n",wc.status); goto error4;}//added by hs
+        {printk("Failur: %d \n",wc1.status); goto error4;}//added by hs
     
     }
 
