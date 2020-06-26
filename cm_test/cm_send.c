@@ -50,8 +50,8 @@ int main(int argc, char *argv[])
     char *ipaddr;
 
     ipaddr = malloc(sizeof(8));
-    ipaddr = strdup(argv[0]);
-    printf("ipaddr = %s \n",ipaddr);
+    ipaddr = strdup(argv[1]);
+    printf("destipaddr = %s \n",ipaddr);
 
 
 while(1){
