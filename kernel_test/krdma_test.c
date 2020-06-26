@@ -641,53 +641,6 @@ static void krdma_run_server(struct krdma_cb *cb)
 
 //for find mac 
     union ib_gid gid;
-    ret = rdma_query_gid(ibdev,1,0,&gid);
-    if(ret ==0)
-    {printk("find local gid success\n");
-    int i =0;
-    for(i = 0;i < 16; i++)
-    {
-        printk("%x",gid.raw[i]);
-        printk(":");
-    }
-    }
-    else
-    {
-        printk("gid cannot find \n");goto error4;
-        
-    }
-
-//for find mac 
-    memset(&attr,0,sizeof(attr));
-    attr.qp_state               = IB_QPS_RTR;
-    attr.path_mtu               = IB_MTU_1024;
-    attr.dest_qp_num            = qpinfo_c->qpn;
-    attr.rq_psn                 = 0;
-    attr.max_dest_rd_atomic     = 1;
-    attr.min_rnr_timer          = 12;
-    attr.ah_attr.type           = RDMA_AH_ATTR_TYPE_ROCE;
-    attr.ah_attr.sl             = 0;
-    attr.ah_attr.port_num       = 1;
-    attr.ah_attr.ah_flags       = IB_AH_GRH;
-    attr.ah_attr.grh.dgid       = gid;
-    attr.ah_attr.grh.hop_limit  = 1;
-    attr.ah_attr.grh.sgid_index = 0;
-    //add src gid attr
-
-
-  int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
-
-    //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
-
-    ib_resolve_eth_dmac(ibdev,&attr, &qp_attr_mask2);
-    memcpy(qpinfo->dmac,attr.ah_attr.roce.dmac,6);
-    int i =0;
-    for(i = 0; i< 6; i++)
-    {
-        printk("%x",attr.ah_attr.roce.dmac[i]);
-    }
-
-
     memset(&gid,0,sizeof(union ib_gid));
     ret = rdma_query_gid(ibdev,1,2,&gid);
     if(ret ==0)
@@ -934,7 +887,7 @@ static void krdma_run_client(struct krdma_cb *cb)
      printk("start to alloc dma buf\n");
     cb->send_buf.size   = 16;
     cb->send_buf.buf    = bufaddr;
-    memcpy(cb->send_buf.buf,"hello",5);
+    memcpy(cb->send_buf.buf,"hello,myworldexa",16);
     printk("send buf: %s \n",cb->send_buf.buf);
     
      printk("endto alloc dma buf\n");
@@ -971,7 +924,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     attr.port_num = 1;
     attr.qp_access_flags =IB_ACCESS_REMOTE_WRITE | IB_ACCESS_REMOTE_READ |
                               IB_ACCESS_LOCAL_WRITE | IB_ACCESS_REMOTE_ATOMIC;
-        int qp_attr_mask = IB_QP_STATE | IB_QP_PKEY_INDEX |IB_QP_PORT |IB_QP_ACCESS_FLAGS;
+    int qp_attr_mask = IB_QP_STATE | IB_QP_PKEY_INDEX |IB_QP_PORT |IB_QP_ACCESS_FLAGS;
 
     ret = ib_modify_qp(ibqp,&attr,IB_QP_STATE | IB_QP_PKEY_INDEX |IB_QP_PORT |IB_QP_ACCESS_FLAGS);
     if(ret == 0)
@@ -982,50 +935,6 @@ static void krdma_run_client(struct krdma_cb *cb)
 
 //for find mac 
     union ib_gid gid;
-    ret = rdma_query_gid(ibdev,1,0,&gid);
-    if(ret ==0)
-    {printk("find local gid success\n");
-    int i =0;
-    for(i = 0;i < 16; i++)
-    {
-        printk("%x",gid.raw[i]);
-        printk(":");
-    }
-    }
-    else
-    {
-        printk("gid cannot find \n");goto error4;
-        
-    }
-
-//for find mac 
-    memset(&attr,0,sizeof(attr));
-    attr.qp_state               = IB_QPS_RTR;
-    attr.path_mtu               = IB_MTU_1024;
-    attr.dest_qp_num            = qpinfo_s->qpn;
-    attr.rq_psn                 = 0;
-    attr.max_dest_rd_atomic     = 1;
-    attr.min_rnr_timer          = 12;
-    attr.ah_attr.type           = RDMA_AH_ATTR_TYPE_ROCE;
-    attr.ah_attr.sl             = 0;
-    attr.ah_attr.port_num       = 1;
-    attr.ah_attr.ah_flags       = IB_AH_GRH;
-    attr.ah_attr.grh.dgid       = gid;
-    attr.ah_attr.grh.hop_limit  = 1;
-    attr.ah_attr.grh.sgid_index = 0;
-
-  int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
-
-    //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
-
-    ib_resolve_eth_dmac(ibdev,&attr, &qp_attr_mask2);
-    memcpy(qpinfo->dmac,attr.ah_attr.roce.dmac,6);
-    int i =0;
-    for(i = 0; i< 6; i++)
-    {
-        printk("%x",attr.ah_attr.roce.dmac[i]);
-    }
-
     memset(&gid,0,sizeof(gid));
     ret = rdma_query_gid(ibdev,1,2,&gid);
     if(ret ==0)
