@@ -709,6 +709,13 @@ static void krdma_run_server(struct krdma_cb *cb)
     qpinfo->addr.remote_addr = cb->send_dma_addr;
     qpinfo->addr.size        = cb->send_buf.size;
     qpinfo->addr.rkey        = cb->send_buf.rkey;
+
+    printk("server: qpn : 0x%x \n",ibqp->qp_num);
+    printk("server: addr : 0x%lx \n",cb->send_dma_addr);
+    printk("server: size : 0x%lx \n",cb->send_buf.size);
+    printk("server: rkey : 0x%lx \n",cb->send_buf.rkey);
+
+
     start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
     printk("client's qpinfo : \n");
     printk("client: qpn:0x %d \n",qpinfo_c->qpn);
@@ -1040,6 +1047,12 @@ static void krdma_run_client(struct krdma_cb *cb)
     qpinfo->addr.remote_addr = cb->send_dma_addr;
     qpinfo->addr.size        = cb->send_buf.size;
     qpinfo->addr.rkey        = cb->send_buf.rkey;
+
+    printk("client: qpn : 0x%x \n",ibqp->qp_num);
+    printk("client: addr : 0x%lx \n",cb->send_dma_addr);
+    printk("client: size : 0x%lx \n",cb->send_buf.size);
+    printk("client: rkey : 0x%lx \n",cb->send_buf.rkey);
+
     start_my_client(cb,(char *)qpinfo,size,(char *)qpinfo_s,size);
     
      printk("server's qpinfo : \n");
