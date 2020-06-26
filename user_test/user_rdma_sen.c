@@ -510,6 +510,9 @@ if(ctx1->client == 1)
 		return 1;
 	}
 
+if(ctx1->client == 0)
+	{printf("wait 5 seconds to read\n");sleep(5);}
+
 	printf("buf: %s \n",ctx1->buf);
 
 
