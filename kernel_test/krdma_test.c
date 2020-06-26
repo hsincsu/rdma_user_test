@@ -822,7 +822,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         printk("send buf: 0x%x \n",*cb->send_buf.buf);
         }
         else
-        {printk("Failur: %d \n",wc1.status);goto error4;}//added by h
+        {printk("Failur: %d \n",wc1.status);}//added by h
         }
 
         printk("server send buf: %s \n",cb->send_buf.buf);
@@ -1164,7 +1164,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     if(wc1.status ==IB_WC_SUCCESS)
             printk("Successful \n");//added by hs           
     else
-        {printk("Failur: %d \n",wc1.status); goto error4;}//added by hs
+        {printk("Failur: %d \n",wc1.status); }//added by hs
     
     }
 
