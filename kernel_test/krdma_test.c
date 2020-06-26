@@ -743,14 +743,14 @@ static void krdma_run_server(struct krdma_cb *cb)
     attr.ah_attr.grh.sgid_index = 2;
     //memcpy(attr.ah_attr.roce.dmac,qpinfo_c->dmac,6);
     //add src gid attr
-    struct ib_gid_attr src_gid_attr;
-    src_gid_attr.device      = ibdev;
-    src_gid_attr.ndev        = ibdev->ops.get_netdev(ibdev,1);
-    src_gid_attr.gid         = qpinfo->gid;
-    src_gid_attr.gid_type    = IB_GID_TYPE_ROCE_UDP_ENCAP;
-    src_gid_attr.index       = 2;
-    src_gid_attr.port_num    = 1;
-    attr.ah_attr.grh.sgid_attr = &src_gid_attr;
+    // struct ib_gid_attr src_gid_attr;
+    // src_gid_attr.device      = ibdev;
+    // src_gid_attr.ndev        = ibdev->ops.get_netdev(ibdev,1);
+    // src_gid_attr.gid         = qpinfo->gid;
+    // src_gid_attr.gid_type    = IB_GID_TYPE_ROCE_UDP_ENCAP;
+    // src_gid_attr.index       = 2;
+    // src_gid_attr.port_num    = 1;
+    // attr.ah_attr.grh.sgid_attr = &src_gid_attr;
    
    //attr.ah_attr.grh.sgid_attr = rdma_find_gid_by_device(ibdev,&qpinfo->gid,1);
         // we pretend to make a incomming packet.
@@ -1102,6 +1102,12 @@ static void krdma_run_client(struct krdma_cb *cb)
    
   
     qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
+
+    printk("dmac:");
+    for(i = 0 ;i< 6; i++)
+    {
+        printk("%x",attr.ah_attr.roce.dmac[i]);
+    }
 
     ret = ib_modify_qp(ibqp,&attr,qp_attr_mask2);
     if(ret == 0)
