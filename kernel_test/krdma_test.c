@@ -684,8 +684,8 @@ static void krdma_run_server(struct krdma_cb *cb)
 
     struct ib_grh grh;
     memset(&grh,0,sizeof(grh));
-    struct rdma_network_hdr *hdr;
-    hdr = (struct rdma_network_hdr *)&grh;
+    union rdma_network_hdr *hdr;
+    hdr = (union rdma_network_hdr *)&grh;
     struct iphdr *ip4h = (struct iphdr *)&hdr->roce4grh;
     ip4h->version = 4;
     ip4h-> ihl    = 5;
@@ -700,7 +700,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     }else
         printk("init ah success\n");
 
-        
+
 
   int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
@@ -815,9 +815,9 @@ static void krdma_run_server(struct krdma_cb *cb)
         {printk("modify qp rts failed \n"); goto error4;}
 
 
-    struct ib_wc wc;
-        if(ib_poll_cq(ibcq,1,&wc)>=0){
-        if(wc.status ==IB_WC_SUCCESS)
+    struct ib_wc wc1;
+        if(ib_poll_cq(ibcq,1,&wc1)>=0){
+        if(wc1.status ==IB_WC_SUCCESS)
         {printk("Successful \n");//added by hs           
         printk("send buf: 0x%x \n",*cb->send_buf.buf);
         }
@@ -1082,8 +1082,8 @@ static void krdma_run_client(struct krdma_cb *cb)
 
     struct ib_grh grh;
     memset(&grh,0,sizeof(grh));
-    struct rdma_network_hdr *hdr;
-    hdr = (struct rdma_network_hdr *)&grh;
+    union rdma_network_hdr *hdr;
+    hdr = (union rdma_network_hdr *)&grh;
     struct iphdr *ip4h = (struct iphdr *)&hdr->roce4grh;
     ip4h->version = 4;
     ip4h-> ihl    = 5;
@@ -1159,9 +1159,9 @@ static void krdma_run_client(struct krdma_cb *cb)
                 goto error4;
         }
 
-    struct ib_wc wc;
-    if(ib_poll_cq(ibcq,1,&wc)>=0){
-    if(wc.status ==IB_WC_SUCCESS)
+    struct ib_wc wc1;
+    if(ib_poll_cq(ibcq,1,&wc1)>=0){
+    if(wc1.status ==IB_WC_SUCCESS)
             printk("Successful \n");//added by hs           
     else
         {printk("Failur: %d \n",wc.status); goto error4;}//added by hs
