@@ -140,6 +140,7 @@ int start_my_server(struct pingpong_context *ctx,char *send_buf,int sendsize ,ch
 			exit(0);
 		}
 		printf("send success\n");
+		
 		close(connfd);
 		close(sockfd);
 
