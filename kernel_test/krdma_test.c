@@ -595,6 +595,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     printk("start to alloc dma buf\n");
     cb->send_buf.size   = 16;
     printk("end of alloc dma buf \n");
+    printk("server send buf: %s \n",cb->send_buf.buf);
     cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,cb->send_buf.size, DMA_BIDIRECTIONAL);
     if(ib_dma_mapping_error(ibdev,cb->send_dma_addr) != 0)
     {
@@ -824,7 +825,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         {printk("Failur: %d \n",wc1.status);goto error4;}//added by h
         }
 
-    
+        printk("server send buf: %s \n",cb->send_buf.buf);
 
 
 error4:
@@ -1167,7 +1168,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     
     }
 
-
+    printk("client send buf: %s \n",cb->send_buf.buf);
 
 
 
