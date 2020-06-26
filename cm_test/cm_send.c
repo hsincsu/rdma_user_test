@@ -47,6 +47,12 @@ int main(int argc, char *argv[])
     int buflen;
     int data;    
     int choose;
+    char *ipaddr;
+
+    ipaddr = malloc(sizeof(8));
+    ipaddr = strdup(argv[0]);
+    printf("ipaddr = %s \n",ipaddr);
+
 
 while(1){
     printf("welcome to debug sys in sysfs(later change to debugfs):\n");
@@ -58,7 +64,7 @@ while(1){
     printf("please choose:");
     scanf("%d",&choose);
 
-    buf[0] = ntohl(inet_addr("10.0.0.5"));
+    buf[0] = ntohl(inet_addr(ipaddr));
 
     switch(choose)
     {
