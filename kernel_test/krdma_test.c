@@ -674,34 +674,6 @@ static void krdma_run_server(struct krdma_cb *cb)
     //add src gid attr
 
 
-        // we pretend to make a incomming packet.
-    struct ib_wc wc; //we make a wc so we can configure a ah_attr for dest gid.
-    memset(&wc,0,sizeof(wc));
-    wc.sl = 0;
-    wc.wc_flags = IB_WC_GRH;
-    wc.slid     = 0;
-
-
-    struct ib_grh grh;
-    memset(&grh,0,sizeof(grh));
-    union rdma_network_hdr *hdr;
-    hdr = (union rdma_network_hdr *)&grh;
-    struct iphdr *ip4h = (struct iphdr *)&hdr->roce4grh;
-    ip4h->version = 4;
-    ip4h-> ihl    = 5;
-    ip4h->saddr   = in_aton("10.0.0.3");
-    ip4h->daddr   = in_aton(cb->addr_str);
-    ip4h->check = ip_fast_csum((u8 *)ip4h,5);
-
-    ret = ib_init_ah_attr_from_wc(ibdev,1,&wc,&grh,&attr.ah_attr);
-    if(ret)
-    {
-        printk("init ah failed \n");
-    }else
-        printk("init ah success\n");
-
-
-
   int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
@@ -780,7 +752,34 @@ static void krdma_run_server(struct krdma_cb *cb)
     attr.ah_attr.grh.sgid_attr = &src_gid_attr;
    
    //attr.ah_attr.grh.sgid_attr = rdma_find_gid_by_device(ibdev,&qpinfo->gid,1);
-   
+        // we pretend to make a incomming packet.
+    struct ib_wc wc; //we make a wc so we can configure a ah_attr for dest gid.
+    memset(&wc,0,sizeof(wc));
+    wc.sl = 0;
+    wc.wc_flags = IB_WC_GRH;
+    wc.slid     = 0;
+
+
+    struct ib_grh grh;
+    memset(&grh,0,sizeof(grh));
+    union rdma_network_hdr *hdr;
+    hdr = (union rdma_network_hdr *)&grh;
+    struct iphdr *ip4h = (struct iphdr *)&hdr->roce4grh;
+    ip4h->version = 4;
+    ip4h-> ihl    = 5;
+    ip4h->saddr   = in_aton("10.0.0.3");
+    ip4h->daddr   = in_aton(cb->addr_str);
+    ip4h->check = ip_fast_csum((u8 *)ip4h,5);
+
+    ret = ib_init_ah_attr_from_wc(ibdev,1,&wc,&grh,&attr.ah_attr);
+    if(ret)
+    {
+        printk("init ah failed \n");
+    }else
+        printk("init ah success\n");
+
+
+
     qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
