@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 	//get opt
 	unsigned int port = 8888;
 	int 	  ib_port = 1;
-	unsigned int size = 4096;
+	unsigned int size = 16;
 	int       	 gidx = 2;
 	int 		client= 0;
 	char  *servername = NULL;
@@ -319,8 +319,9 @@ int main(int argc, char *argv[])
 	ctx1->servername = servername;
 	ctx1->client	 = client;
 	page_size 		 = sysconf(_SC_PAGESIZE);
-	ctx1->buf 		 = memalign(page_size, size);
+	ctx1->buf 		 = malloc(size);//memalign(page_size, size);
 	ctx1->size 		 = size;
+	memset(ctx1->buf,0,size);
 	if(ctx1->client == 1)
 	memcpy(ctx1->buf,"hello,world",12);
 	
