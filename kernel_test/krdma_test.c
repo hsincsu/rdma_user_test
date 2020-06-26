@@ -524,6 +524,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     struct ib_cq *ibcq;
     struct ib_mr *ibmr;
     struct ib_qp *ibqp;
+    int i =0;
     int ret;
     char *bufaddr;
 
@@ -645,7 +646,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     ret = rdma_query_gid(ibdev,1,2,&gid);
     if(ret ==0)
     {printk("find port2 2 gid success\n");
-    int i =0;
+    
     for(i = 0;i < 16; i++)
     {
         printk("%x",gid.raw[i]);
@@ -741,7 +742,7 @@ static void krdma_run_server(struct krdma_cb *cb)
 
 
 
-    qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
+    int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
     printk("dmac:");
@@ -816,6 +817,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     struct ib_cq *ibcq;
     struct ib_mr *ibmr;
     struct ib_qp *ibqp;
+    int i =0;
     int ret;
     char *bufaddr;
 
@@ -939,7 +941,6 @@ static void krdma_run_client(struct krdma_cb *cb)
     ret = rdma_query_gid(ibdev,1,2,&gid);
     if(ret ==0)
     {printk("find local gid success\n");
-    int i =0;
     for(i = 0;i < 16; i++)
     {
         printk("%x",gid.raw[i]);
@@ -1023,7 +1024,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     //memcpy(attr.ah_attr.roce.dmac,qpinfo_s->dmac,6);
    
   
-    qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
+    int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     printk("dmac:");
     for(i = 0 ;i< 6; i++)
