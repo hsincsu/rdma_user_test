@@ -560,9 +560,8 @@ static void krdma_run_server(struct krdma_cb *cb)
     cb->pd = ibpd;
 
     struct ib_cq_init_attr cqattr;
-    cqattr.cqe = 10;
-    cqattr.flags = 0;
-    cqattr.comp_vector = 1;
+    cqattr.cqe = 100;
+    cqattr.comp_vector = 0;
 
     ibcq = ib_create_cq(ibdev,NULL,NULL,NULL,&cqattr);
     if(IS_ERR(ibcq)){
@@ -741,10 +740,33 @@ static void krdma_run_server(struct krdma_cb *cb)
         printk("init ah success\n");
 
 
+    if(ret == 0)
+    {   
+       printk("ah_attr.sl : 0x%x\n",attr.ah_attr.sl);
+       printk("ah_attr.static_rate : 0x%x\n",attr.ah_attr.static_rate);
+       printk("ah_attr.port_num:  0x%x\n",attr.ah_attr.port_num);
+       printk("ah_attr.ah_flags:  0x%x\n",attr.ah_attr.ah_flags);
+       printk("ah_attr.type:      0x%x\n",attr.ah_attr.type);
+       printk("ah_attr.grh.flow_label: 0x%x\n",attr.ah_attr.grh.flow_label);
+       printk("ah_attr.grh.sgid_index:      0x%x\n",attr.ah_attr.grh.sgid_index);
+       printk("ah_attr.grh.hop_limit:      0x%x\n",attr.ah_attr.grh.hop_limit);
+       printk("ah_attr.grh.traffic_class:      0x%x\n",attr.ah_attr.grh.traffic_class);
+       printk("ah_attr.grh.sgid_attr->port_num: 0x%x\n",attr.ah_attr.grh.sgid_attr->port_num);
+       printk("ah_attr.grh.sgid_attr->index: 0x%x\n",attr.ah_attr.grh.sgid_attr->index);
+       printk("ah_attr.grh.sgid_attr->gid_type: 0x%x\n",attr.ah_attr.grh.sgid_attr->gid_type);
+    }
+
 
     int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
+  
+    for(i = 0;i < 16; i++)
+    {
+        printk("%x",attr.ah_attr.grh.dgid.raw[i]);
+        printk(":");
+    }
+  
     printk("dmac:");
     for(i = 0 ;i< 6; i++)
     {
@@ -853,8 +875,8 @@ static void krdma_run_client(struct krdma_cb *cb)
 
     struct ib_cq_init_attr cqattr;
     cqattr.cqe = 10;
-    cqattr.flags = 0;
-    cqattr.comp_vector = 1;
+    //cqattr.flags = 0;
+    cqattr.comp_vector = 0;
 
     ibcq = ib_create_cq(ibdev,NULL,NULL,NULL,&cqattr);
     if(IS_ERR(ibcq)){
@@ -972,7 +994,6 @@ static void krdma_run_client(struct krdma_cb *cb)
     printk("server: addr : 0x%lx \n",qpinfo_s->addr.remote_addr);
     printk("server: size : 0x%lx \n",qpinfo_s->addr.size);
     printk("server: rkey : 0x%lx \n",qpinfo_s->addr.rkey);
-
     printk("start to modify qp \n");
     i  = 0;
     printk("remote dmac:");
@@ -980,7 +1001,16 @@ static void krdma_run_client(struct krdma_cb *cb)
     printk("%x",qpinfo_s->dmac[i]);
 
 
+
+
     memset(&attr,0,sizeof(attr));
+    // we pretend to make a incomming packet.
+    struct ib_wc wc; //we make a wc so we can configure a ah_attr for dest gid.
+    memset(&wc,0,sizeof(wc));
+    wc.sl = 0;
+    wc.wc_flags = IB_WC_GRH;
+    wc.slid     = 0;
+
     attr.qp_state               = IB_QPS_RTR;
     attr.path_mtu               = IB_MTU_1024;
     attr.dest_qp_num            = qpinfo_s->qpn;
@@ -994,14 +1024,6 @@ static void krdma_run_client(struct krdma_cb *cb)
     attr.ah_attr.grh.dgid       = qpinfo_s->gid;
     attr.ah_attr.grh.hop_limit  = 1;
     attr.ah_attr.grh.sgid_index = 2;
-
-    // we pretend to make a incomming packet.
-    struct ib_wc wc; //we make a wc so we can configure a ah_attr for dest gid.
-    memset(&wc,0,sizeof(wc));
-    wc.sl = 0;
-    wc.wc_flags = IB_WC_GRH;
-    wc.slid     = 0;
-
 
     struct ib_grh grh;
     memset(&grh,0,sizeof(grh));
@@ -1021,10 +1043,30 @@ static void krdma_run_client(struct krdma_cb *cb)
     }else
         printk("init ah success\n");
 
-    //memcpy(attr.ah_attr.roce.dmac,qpinfo_s->dmac,6);
-   
+    if(ret == 0)
+    {   
+       printk("ah_attr.sl : 0x%x\n",attr.ah_attr.sl);
+       printk("ah_attr.static_rate : 0x%x\n",attr.ah_attr.static_rate);
+       printk("ah_attr.port_num:  0x%x\n",attr.ah_attr.port_num);
+       printk("ah_attr.ah_flags:  0x%x\n",attr.ah_attr.ah_flags);
+       printk("ah_attr.type:      0x%x\n",attr.ah_attr.type);
+       printk("ah_attr.grh.flow_label: 0x%x\n",attr.ah_attr.grh.flow_label);
+       printk("ah_attr.grh.sgid_index:      0x%x\n",attr.ah_attr.grh.sgid_index);
+       printk("ah_attr.grh.hop_limit:      0x%x\n",attr.ah_attr.grh.hop_limit);
+       printk("ah_attr.grh.traffic_class:      0x%x\n",attr.ah_attr.grh.traffic_class);
+       printk("ah_attr.grh.sgid_attr->port_num: 0x%x\n",attr.ah_attr.grh.sgid_attr->port_num);
+       printk("ah_attr.grh.sgid_attr->index: 0x%x\n",attr.ah_attr.grh.sgid_attr->index);
+       printk("ah_attr.grh.sgid_attr->gid_type: 0x%x\n",attr.ah_attr.grh.sgid_attr->gid_type);
+    }
+
   
     int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
+
+    for(i = 0;i < 16; i++)
+    {
+        printk("%x",attr.ah_attr.grh.dgid.raw[i]);
+        printk(":");
+    }
 
     printk("dmac:");
     for(i = 0 ;i< 6; i++)
