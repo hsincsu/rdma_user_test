@@ -642,7 +642,7 @@ static void krdma_run_server(struct krdma_cb *cb)
 //for find mac 
     union ib_gid gid;
     memset(&gid,0,sizeof(union ib_gid));
-    ret = rdma_query_gid(ibdev,1,2,&gid);
+    ret = rdma_query_gid(ibdev,1,3,&gid);
     if(ret ==0)
     {printk("find port2 2 gid success\n");
     
@@ -700,7 +700,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     attr.ah_attr.ah_flags       = IB_AH_GRH;
     attr.ah_attr.grh.dgid       = qpinfo_c->gid;
     attr.ah_attr.grh.hop_limit  = 1;
-    attr.ah_attr.grh.sgid_index = 2;
+    attr.ah_attr.grh.sgid_index = 3;
     //memcpy(attr.ah_attr.roce.dmac,qpinfo_c->dmac,6);
     //add src gid attr
     // struct ib_gid_attr src_gid_attr;
@@ -874,7 +874,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     cb->pd = ibpd;
 
     struct ib_cq_init_attr cqattr;
-    cqattr.cqe = 10;
+    cqattr.cqe = 100;
     //cqattr.flags = 0;
     cqattr.comp_vector = 0;
 
@@ -960,7 +960,7 @@ static void krdma_run_client(struct krdma_cb *cb)
 //for find mac 
     union ib_gid gid;
     memset(&gid,0,sizeof(gid));
-    ret = rdma_query_gid(ibdev,1,2,&gid);
+    ret = rdma_query_gid(ibdev,1,3,&gid);
     if(ret ==0)
     {printk("find local gid success\n");
     for(i = 0;i < 16; i++)
@@ -1022,8 +1022,8 @@ static void krdma_run_client(struct krdma_cb *cb)
     attr.ah_attr.port_num       = 1;
     attr.ah_attr.ah_flags       = IB_AH_GRH;
     attr.ah_attr.grh.dgid       = qpinfo_s->gid;
-    attr.ah_attr.grh.hop_limit  = 1;
-    attr.ah_attr.grh.sgid_index = 2;
+    attr.ah_attr.grh.hop_limit  = 0x40;
+    attr.ah_attr.grh.sgid_index = 3;
 
     struct ib_grh grh;
     memset(&grh,0,sizeof(grh));
