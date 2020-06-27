@@ -642,7 +642,7 @@ static void krdma_run_server(struct krdma_cb *cb)
 //for find mac 
     union ib_gid gid;
     memset(&gid,0,sizeof(union ib_gid));
-    ret = rdma_query_gid(ibdev,1,2,&gid);
+    ret = rdma_query_gid(ibdev,1,3,&gid);
     if(ret ==0)
     {printk("find port2 2 gid success\n");
     
@@ -659,12 +659,12 @@ static void krdma_run_server(struct krdma_cb *cb)
     }
 
     memcpy(&qpinfo->gid,&gid,sizeof(union ib_gid));
-    qpinfo->addr.remote_addr = cb->send_dma_addr;
+    qpinfo->addr.remote_addr = cb->send_buf.buf;
     qpinfo->addr.size        = cb->send_buf.size;
     qpinfo->addr.rkey        = cb->send_buf.rkey;
 
     printk("server: qpn : 0x%x \n",ibqp->qp_num);
-    printk("server: addr : 0x%lx \n",cb->send_dma_addr);
+    printk("server: addr : 0x%lx \n",cb->send_buf.buf);
     printk("server: size : 0x%lx \n",cb->send_buf.size);
     printk("server: rkey : 0x%lx \n",cb->send_buf.rkey);
 
@@ -700,7 +700,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     attr.ah_attr.ah_flags       = IB_AH_GRH;
     attr.ah_attr.grh.dgid       = qpinfo_c->gid;
     attr.ah_attr.grh.hop_limit  = 1;
-    attr.ah_attr.grh.sgid_index = 2;
+    attr.ah_attr.grh.sgid_index = 3;
     //memcpy(attr.ah_attr.roce.dmac,qpinfo_c->dmac,6);
     //add src gid attr
     // struct ib_gid_attr src_gid_attr;
@@ -756,7 +756,7 @@ static void krdma_run_server(struct krdma_cb *cb)
        printk("ah_attr.grh.sgid_attr->gid_type: 0x%x\n",attr.ah_attr.grh.sgid_attr->gid_type);
     }
 
-
+    attr.ah_attr.grh.hop_limit  = 1;
     int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     //rdma_create_ah(ibpd,&attr.ah_attr,RDMA_CREATE_AH_SLEEPABLE);
@@ -976,12 +976,12 @@ static void krdma_run_client(struct krdma_cb *cb)
     }
 
     memcpy(&qpinfo->gid,&gid,sizeof(union ib_gid));
-    qpinfo->addr.remote_addr = cb->send_dma_addr;
+    qpinfo->addr.remote_addr = cb->send_buf.buf;
     qpinfo->addr.size        = cb->send_buf.size;
     qpinfo->addr.rkey        = cb->send_buf.rkey;
 
     printk("client: qpn : 0x%x \n",ibqp->qp_num);
-    printk("client: addr : 0x%lx \n",cb->send_dma_addr);
+    printk("client: addr : 0x%lx \n",cb->send_buf.buf);
     printk("client: size : 0x%lx \n",cb->send_buf.size);
     printk("client: rkey : 0x%lx \n",cb->send_buf.rkey);
 
