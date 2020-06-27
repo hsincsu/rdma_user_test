@@ -874,7 +874,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     cb->pd = ibpd;
 
     struct ib_cq_init_attr cqattr;
-    cqattr.cqe = 100;
+    cqattr.cqe = 10;
     //cqattr.flags = 0;
     cqattr.comp_vector = 0;
 
@@ -909,9 +909,9 @@ static void krdma_run_client(struct krdma_cb *cb)
     // memset(bufaddr,0x12345678,4);
     // printk("client:0x%x \n",*bufaddr);
      printk("start to alloc dma buf\n");
-    cb->send_buf.size   = 17;
+    cb->send_buf.size   = 16;
     cb->send_buf.buf    = bufaddr;
-    memcpy(cb->send_buf.buf,"hello,myworldexa",17);
+    memcpy(cb->send_buf.buf,"hello,myworldexa",16);
     printk("send buf: %s \n",cb->send_buf.buf);
     
      printk("endto alloc dma buf\n");
@@ -1139,7 +1139,17 @@ static void krdma_run_client(struct krdma_cb *cb)
         {printk("Failur: %d \n",wc1.status); }//added by hs
     
     }
+    printk("wc:wr_id: %d \n",wc1.wr_id);
+    printk("wc:opcode: 0x%x \n",wc1.opcode);
+    printk("wc:vendor_err: 0x%x \n",wc1.vendor_err);
+    printk("wc:byte_len: %d \n",wc1.byte_len);
+    printk("wc:src_qp: %d \n",wc1.src_qp);
+    printk("wc:wc_flags: %d\n",wc1.wc_flags);
+    printk("wc:pkey_index: %d \n",wc1.pkey_index);
+    printk("wc:port_num: %d \n",wc1.port_num);
+    
 
+    printk("wc.status:%s\n",ib_wc_status_msg(wc1.status));
     printk("client send buf: %s \n",cb->send_buf.buf);
 
 
