@@ -960,7 +960,7 @@ static void krdma_run_client(struct krdma_cb *cb)
 //for find mac 
     union ib_gid gid;
     memset(&gid,0,sizeof(gid));
-    ret = rdma_query_gid(ibdev,1,2,&gid);
+    ret = rdma_query_gid(ibdev,1,3,&gid);
     if(ret ==0)
     {printk("find local gid success\n");
     for(i = 0;i < 16; i++)
@@ -1022,8 +1022,8 @@ static void krdma_run_client(struct krdma_cb *cb)
     attr.ah_attr.port_num       = 1;
     attr.ah_attr.ah_flags       = IB_AH_GRH;
     attr.ah_attr.grh.dgid       = qpinfo_s->gid;
-    attr.ah_attr.grh.hop_limit  = 0x40;
-    attr.ah_attr.grh.sgid_index = 2;
+    attr.ah_attr.grh.hop_limit  = 1;
+    attr.ah_attr.grh.sgid_index = 3;
 
     struct ib_grh grh;
     memset(&grh,0,sizeof(grh));
@@ -1059,7 +1059,8 @@ static void krdma_run_client(struct krdma_cb *cb)
        printk("ah_attr.grh.sgid_attr->gid_type: 0x%x\n",attr.ah_attr.grh.sgid_attr->gid_type);
     }
 
-  
+    attr.ah_attr.grh.hop_limit  = 1;
+
     int qp_attr_mask2 = IB_QP_STATE|IB_QP_AV|IB_QP_PATH_MTU| IB_QP_DEST_QPN|IB_QP_RQ_PSN| IB_QP_MAX_DEST_RD_ATOMIC | IB_QP_MIN_RNR_TIMER;
 
     for(i = 0;i < 16; i++)
