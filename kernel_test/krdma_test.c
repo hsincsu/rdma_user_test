@@ -560,7 +560,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     cb->pd = ibpd;
 
     struct ib_cq_init_attr cqattr;
-    cqattr.cqe = 100;
+    cqattr.cqe = 10;
     cqattr.comp_vector = 0;
 
     ibcq = ib_create_cq(ibdev,NULL,NULL,NULL,&cqattr);
@@ -875,7 +875,7 @@ static void krdma_run_client(struct krdma_cb *cb)
 
     struct ib_cq_init_attr cqattr;
     cqattr.cqe = 10;
-    //cqattr.flags = 0;
+    cqattr.flags = 0;
     cqattr.comp_vector = 0;
 
     ibcq = ib_create_cq(ibdev,NULL,NULL,NULL,&cqattr);
@@ -1147,7 +1147,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     printk("wc:wc_flags: %d\n",wc1.wc_flags);
     printk("wc:pkey_index: %d \n",wc1.pkey_index);
     printk("wc:port_num: %d \n",wc1.port_num);
-    
+
 
     printk("wc.status:%s\n",ib_wc_status_msg(wc1.status));
     printk("client send buf: %s \n",cb->send_buf.buf);
