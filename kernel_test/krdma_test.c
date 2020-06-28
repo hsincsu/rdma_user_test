@@ -82,7 +82,7 @@ struct krdma_stats {
 #define EXCHANGE_ADDRINFO 0x101;
 
 struct addr_info{
-    uint64_t remote_addr;
+    char *remote_addr;
     uint64_t size;
     uint64_t rkey;
 };
