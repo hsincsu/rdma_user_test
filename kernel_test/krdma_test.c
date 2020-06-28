@@ -1116,7 +1116,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     sg1.lkey = cb->send_buf.lkey;
 
      memset(&wr1,0,sizeof(wr1));
-     wr1.wr.wr_id =1;
+     wr1.wr.wr_id =&wr1;
     wr1.wr.sg_list = &sg1;
     wr1.wr.num_sge = 1;
     wr1.wr.opcode = IB_WR_RDMA_WRITE;
@@ -1131,13 +1131,14 @@ static void krdma_run_client(struct krdma_cb *cb)
         }
 
     struct ib_wc wc1;
-    if(ib_poll_cq(ibcq,1,&wc1)>=0){
+    if(ib_poll_cq(&ibcq,1,&wc1)>=0){
     if(wc1.status ==IB_WC_SUCCESS)
             printk("Successful \n");//added by hs           
     else
         {printk("Failur: %d \n",wc1.status); }//added by hs
     
     }
+
     printk("wc:wr_id: %d \n",wc1.wr_id);
     printk("wc:opcode: 0x%x \n",wc1.opcode);
     printk("wc:vendor_err: 0x%x \n",wc1.vendor_err);
