@@ -595,7 +595,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     bufaddr             = kzalloc(4096,GFP_KERNEL);
     cb->send_buf.buf    = bufaddr;
     printk("start to alloc dma buf\n");
-    cb->send_buf.size   = 17;
+    cb->send_buf.size   = 4096;
     printk("end of alloc dma buf \n");
     printk("server send buf: %s \n",cb->send_buf.buf);
     cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,4096, DMA_BIDIRECTIONAL);
@@ -913,7 +913,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     // memset(bufaddr,0x12345678,4);
     // printk("client:0x%x \n",*bufaddr);
      printk("start to alloc dma buf\n");
-    cb->send_buf.size   = 16;
+    cb->send_buf.size   = 4096;
     cb->send_buf.buf    = bufaddr;
     memcpy(cb->send_buf.buf,"hello,myworldexa",16);
     printk("send buf: %s \n",cb->send_buf.buf);
