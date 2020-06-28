@@ -931,6 +931,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     struct qp_info *qpinfo = NULL;
     struct qp_info *qpinfo_s = NULL;
     int size = sizeof(*qpinfo);
+    printk("sizeof qpinfo:0x%x\n",sizeof(*qpinfo));
     qpinfo_s = kmalloc(sizeof(*qpinfo_s),GFP_KERNEL);
     qpinfo = kmalloc(sizeof(*qpinfo),GFP_KERNEL);
     memset(qpinfo,0,sizeof(*qpinfo));
