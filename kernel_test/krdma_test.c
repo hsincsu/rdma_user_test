@@ -728,7 +728,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     struct iphdr *ip4h = (struct iphdr *)&hdr->roce4grh;
     ip4h->version = 4;
     ip4h-> ihl    = 5;
-    ip4h->saddr   = in_aton("10.0.0.3");
+    ip4h->saddr   = in_aton(cb->destaddr_str);
     ip4h->daddr   = in_aton(cb->addr_str);
     ip4h->check = ip_fast_csum((u8 *)ip4h,5);
 
@@ -799,7 +799,7 @@ static void krdma_run_server(struct krdma_cb *cb)
 
 
     struct ib_wc wc1;
-        if(ib_poll_cq(ibcq,1,&wc1)>=0){
+        if(ib_poll_cq(ibcq,2,&wc1)>=0){
         if(wc1.status ==IB_WC_SUCCESS)
         {printk("Successful \n");//added by hs           
         printk("send buf: 0x%x \n",*cb->send_buf.buf);
@@ -1032,7 +1032,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     struct iphdr *ip4h = (struct iphdr *)&hdr->roce4grh;
     ip4h->version = 4;
     ip4h-> ihl    = 5;
-    ip4h->saddr   = in_aton("10.0.0.8");
+    ip4h->saddr   = in_aton(cb->destaddr_str);
     ip4h->daddr   = in_aton(cb->addr_str);
     ip4h->check = ip_fast_csum((u8 *)ip4h,5);
 
