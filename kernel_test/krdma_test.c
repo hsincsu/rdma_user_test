@@ -93,7 +93,7 @@ struct qp_info{
     uint32_t qkey;
     uint32_t pkey;
     union ib_gid gid;
-    u8 dmac[6];
+    //u8 dmac[6];
     struct addr_info addr;
 };
 
@@ -681,11 +681,6 @@ static void krdma_run_server(struct krdma_cb *cb)
     printk("client: size : 0x%lx \n",qpinfo_c->addr.size);
     printk("client: rkey : 0x%lx \n",qpinfo_c->addr.rkey);
 
-    i  = 0;
-    printk("remote dmac:");
-    for(i =0; i< 6; i++)
-    printk("%x",qpinfo_c->dmac[i]);
-
 //end
     
     memset(&attr,0,sizeof(attr));
@@ -981,7 +976,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     }
 
     memcpy(&qpinfo->gid,&gid,sizeof(union ib_gid));
-    qpinfo->addr.remote_addr = cb->send_buf.buf;
+    qpinfo->addr.remote_addr = cb->send_dma_addr;
     qpinfo->addr.size        = cb->send_buf.size;
     qpinfo->addr.rkey        = cb->send_buf.rkey;
 
@@ -1000,10 +995,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     printk("server: size : 0x%lx \n",qpinfo_s->addr.size);
     printk("server: rkey : 0x%lx \n",qpinfo_s->addr.rkey);
     printk("start to modify qp \n");
-    i  = 0;
-    printk("remote dmac:");
-    for(i =0; i< 6; i++)
-    printk("%x",qpinfo_s->dmac[i]);
+
 
 
 
