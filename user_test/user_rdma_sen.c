@@ -379,6 +379,7 @@ int main(int argc, char *argv[])
 
 	struct qp_info *qpinfo = NULL;
     struct qp_info *qpinfo_r = NULL;
+	printf("sizeof qpinfo:0x%x\n",sizeof(*qpinfo));
     int qpinfosize = sizeof(*qpinfo);
     qpinfo_r = malloc(sizeof(*qpinfo_r));
     qpinfo = malloc(sizeof(*qpinfo));
@@ -392,6 +393,12 @@ int main(int argc, char *argv[])
 	qpinfo->addr.size 		 = ctx1->size;
 	qpinfo->addr.rkey		 = ctx1->mr->rkey;
 	memcpy(&qpinfo->gid,&ctx1->gid,sizeof(union ibv_gid));
+
+	printf("client: qpn : 0x%x \n",qpinfo->qpn);
+    printf("client: addr : 0x%lx \n",qpinfo->addr.remote_addr);
+    printf("client: size : 0x%lx \n",qpinfo->addr.size);
+    printf("client: rkey : 0x%lx \n",qpinfo->addr.rkey);
+
 
 	printf("start socket\n");
 if(ctx1->client == 1){
