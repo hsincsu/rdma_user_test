@@ -663,12 +663,13 @@ static void krdma_run_server(struct krdma_cb *cb)
     }
 
     memcpy(&qpinfo->gid,&gid,sizeof(union ib_gid));
-    qpinfo->addr.remote_addr = (char *)cb->send_dma_addr;
+    qpinfo->addr.remote_addr = cb->send_dma_addr;
     qpinfo->addr.size        = cb->send_buf.size;
     qpinfo->addr.rkey        = cb->send_buf.rkey;
 
     printk("server: qpn : 0x%x \n",ibqp->qp_num);
     printk("server: addr : 0x%lx \n",cb->send_buf.buf);
+    printk("server:paddr:0x%lx, qpinfo'spaddr:0x%lx\n",cb->send_dma_addr,qpinfo->addr.remote_addr);
     printk("server: size : 0x%lx \n",cb->send_buf.size);
     printk("server: rkey : 0x%lx \n",cb->send_buf.rkey);
 
@@ -798,7 +799,7 @@ static void krdma_run_server(struct krdma_cb *cb)
 
 
     struct ib_wc wc1;
-        if(ib_poll_cq(ibcq,2,&wc1)>=0){
+        if(ib_poll_cq(ibcq,1,&wc1)>=0){
         if(wc1.status ==IB_WC_SUCCESS)
         {printk("Successful \n");//added by hs           
         printk("send buf: 0x%x \n",*cb->send_buf.buf);
@@ -806,7 +807,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         else
         {printk("Failur: %d \n",wc1.status);}//added by h
         }
-
+        msleep(2000);
         printk("server send buf: %s \n",cb->send_buf.buf);
 
 
