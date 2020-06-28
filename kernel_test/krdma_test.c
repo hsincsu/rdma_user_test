@@ -1131,7 +1131,7 @@ static void krdma_run_client(struct krdma_cb *cb)
         }
 
     struct ib_wc wc1;
-    if(ib_poll_cq(&ibcq,1,&wc1)>=0){
+    if(ib_poll_cq(ibcq,1,&wc1)>=0){
     if(wc1.status ==IB_WC_SUCCESS)
             printk("Successful \n");//added by hs           
     else
