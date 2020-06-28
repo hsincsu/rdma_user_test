@@ -85,7 +85,7 @@ struct addr_info{
     char *remote_addr;
     uint64_t size;
     uint64_t rkey;
-};
+}__attribute__ ((packed));;
 
 
 struct qp_info{
@@ -95,7 +95,7 @@ struct qp_info{
     union ib_gid gid;
     //u8 dmac[6];
     struct addr_info addr;
-};
+}__attribute__ ((packed));;
 
 //end
 

@@ -59,7 +59,7 @@ struct addr_info{
 		char *remote_addr;
 		uint64_t size;
 		uint64_t rkey;
-};
+}__attribute__ ((packed));;
 
 struct qp_info{
 		uint32_t qpn;
@@ -68,7 +68,7 @@ struct qp_info{
 		union ibv_gid gid;
 		//uint8_t dmac[6];
 		struct addr_info addr;	
-};
+}__attribute__ ((packed));;
 
 
 static void usage(const char *argv0)
