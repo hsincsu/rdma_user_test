@@ -560,7 +560,9 @@ static void krdma_run_server(struct krdma_cb *cb)
     cb->pd = ibpd;
 
     struct ib_cq_init_attr cqattr;
+    memset(&cqattr,0,sizeof(cqattr));
     cqattr.cqe = 10;
+    cqattr.flags = 0;
     cqattr.comp_vector = 0;
 
     ibcq = ib_create_cq(ibdev,NULL,NULL,NULL,&cqattr);
@@ -625,6 +627,7 @@ static void krdma_run_server(struct krdma_cb *cb)
 
     printk("\t modify_qp start\n");
     struct ib_qp_attr attr;
+    memset(&attr,0,sizeof(attr));
     attr.qp_state = IB_QPS_INIT;
     attr.pkey_index = 0x0;
 //      attr.qkey = 0x0;
@@ -874,6 +877,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     cb->pd = ibpd;
 
     struct ib_cq_init_attr cqattr;
+    memset(&cqattr,0,sizeof(cqattr));
     cqattr.cqe = 10;
     cqattr.flags = 0;
     cqattr.comp_vector = 0;
@@ -942,6 +946,7 @@ static void krdma_run_client(struct krdma_cb *cb)
 
     printk("\t modify_qp start\n");
     struct ib_qp_attr attr;
+    memset(&attr,0,sizeof(attr));
     attr.qp_state = IB_QPS_INIT;
     attr.pkey_index = 0x0;
 //      attr.qkey = 0x0;
