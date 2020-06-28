@@ -407,9 +407,9 @@ if(ctx1->client == 1){
 	printf("gid:");
     for(i =0;i<16;i++)
     printf("%x",qpinfo_r->gid.raw[i]);
-    printf("server: qpn:0x %d \n",qpinfo_r->qpn);
-    printf("server: qkey:0x %d \n",qpinfo_r->qkey);
-    printf("server: pkey: 0x %d \n",qpinfo_r->pkey);
+    printf("server: qpn:0x %x \n",qpinfo_r->qpn);
+    printf("server: qkey:0x %x \n",qpinfo_r->qkey);
+    printf("server: pkey: 0x %x \n",qpinfo_r->pkey);
     printf("server: addr : 0x%lx \n",qpinfo_r->addr.remote_addr);
     printf("server: size : 0x%lx \n",qpinfo_r->addr.size);
     printf("server: rkey : 0x%lx \n",qpinfo_r->addr.rkey);
