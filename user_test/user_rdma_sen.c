@@ -425,9 +425,9 @@ else
     for(i =0;i<16;i++)
     printf("%x",qpinfo_r->gid.raw[i]);
 
-    printf("client: qpn:0x %d \n",qpinfo_r->qpn);
-    printf("client: qkey:0x %d \n",qpinfo_r->qkey);
-    printf("client: pkey: 0x %d \n",qpinfo_r->pkey);
+    printf("client: qpn:0x %x \n",qpinfo_r->qpn);
+    printf("client: qkey:0x %x \n",qpinfo_r->qkey);
+    printf("client: pkey: 0x %x \n",qpinfo_r->pkey);
     printf("client: addr : 0x%lx \n",qpinfo_r->addr.remote_addr);
     printf("client: size : 0x%lx \n",qpinfo_r->addr.size);
     printf("client: rkey : 0x%lx \n",qpinfo_r->addr.rkey);

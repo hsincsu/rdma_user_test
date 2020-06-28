@@ -675,9 +675,9 @@ static void krdma_run_server(struct krdma_cb *cb)
 
     start_my_server(cb,(char *)qpinfo,size,(char *)qpinfo_c,size);
     printk("client's qpinfo : \n");
-    printk("client: qpn:0x %d \n",qpinfo_c->qpn);
-    printk("client: qkey:0x %d \n",qpinfo_c->qkey);
-    printk("client: pkey: 0x %d \n",qpinfo_c->pkey);
+    printk("client: qpn:0x %x \n",qpinfo_c->qpn);
+    printk("client: qkey:0x %x \n",qpinfo_c->qkey);
+    printk("client: pkey: 0x %x \n",qpinfo_c->pkey);
     printk("client: addr : 0x%lx \n",qpinfo_c->addr.remote_addr);
     printk("client: size : 0x%lx \n",qpinfo_c->addr.size);
     printk("client: rkey : 0x%lx \n",qpinfo_c->addr.rkey);
@@ -990,9 +990,9 @@ static void krdma_run_client(struct krdma_cb *cb)
     start_my_client(cb,(char *)qpinfo,size,(char *)qpinfo_s,size);
     
      printk("server's qpinfo : \n");
-    printk("server: qpn:0x %d \n",qpinfo_s->qpn);
-    printk("server: qkey:0x %d \n",qpinfo_s->qkey);
-    printk("server: pkey: 0x %d \n",qpinfo_s->pkey);
+    printk("server: qpn:0x %x \n",qpinfo_s->qpn);
+    printk("server: qkey:0x %x \n",qpinfo_s->qkey);
+    printk("server: pkey: 0x %x \n",qpinfo_s->pkey);
     printk("server: addr : 0x%lx \n",qpinfo_s->addr.remote_addr);
     printk("server: size : 0x%lx \n",qpinfo_s->addr.size);
     printk("server: rkey : 0x%lx \n",qpinfo_s->addr.rkey);
