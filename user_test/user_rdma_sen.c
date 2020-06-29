@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
 	//get opt
 	unsigned int port = 8888;
 	int 	  ib_port = 1;
-	unsigned int size = 16;
+	unsigned int size = 17;
 	int       	 gidx = 2;
 	int 		client= 0;
 	int			mode  = 0;
