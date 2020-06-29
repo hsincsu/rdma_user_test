@@ -41,6 +41,7 @@ struct pingpong_context {
 		int 	  				ib_port;
 		int       	 			gidx;
 		int						client;
+		int						mode;
         union {
                 struct ibv_cq           *cq;
                 struct ibv_cq_ex        *cq_ex;
@@ -74,7 +75,7 @@ struct qp_info{
 static void usage(const char *argv0)
 {
         printf("Usage:\n");
-        printf("  %s            start a server and wait for connection\n", argv0);
+        printf("  %s <addr to bind>           start a server and wait for connection\n", argv0);
         printf("  %s <host>     connect to server at <host>\n", argv0);
         printf("\n");
         printf("Options:\n");
@@ -84,6 +85,7 @@ static void usage(const char *argv0)
         printf("  -s, --size=<size>      size of message to exchange (default 4096)\n");
         printf("  -g, --gid-idx=<gid index> local port gid index\n");
 		printf("  -c, --client=(0/1)	 0-for server mode(default), 1-for client mode\n");
+		printf("  -m, --mode=(0/1)		 0-RDMA_WRITE, 1-SEND/RECV\n");
 }
 
 int start_my_server(struct pingpong_context *ctx,char *send_buf,int sendsize ,char *recv_buf,int recvsize)
@@ -215,6 +217,7 @@ int main(int argc, char *argv[])
 	unsigned int size = 16;
 	int       	 gidx = 2;
 	int 		client= 0;
+	int			mode  = 0;
 	char  *servername = NULL;
 	char  *ib_devname = NULL;
 
@@ -227,9 +230,10 @@ int main(int argc, char *argv[])
                         { .name = "gid-idx",  .has_arg = 1, .val = 'g' },
 						{ .name = "client",   .has_arg = 1, .val = 'c' },
 						{ .name = "ib-dev",	  .has_arg = 1, .val = 'd' },
+						{ .name = "mode",	  .has_arg = 1, .val = 'm' },
                         {}
                 };
-		 c = getopt_long(argc,argv,"p:i:s:g:c:d:",long_options,NULL);
+		 c = getopt_long(argc,argv,"p:i:s:g:c:d:m:",long_options,NULL);
 
 		 if(c == -1)
 		 	break;
@@ -262,6 +266,9 @@ int main(int argc, char *argv[])
 					break;
 			 case 'd':
 					ib_devname = strdupa(optarg);
+					break;
+			 case 'm':
+					mode = strtol(optarg,NULL,0);
 					break;
 			 default:
 			 		usage(argv[0]);
@@ -313,6 +320,7 @@ int main(int argc, char *argv[])
 
 
 	ctx1 = calloc(1,sizeof *ctx1);
+	ctx1->mode		 = mode;
 	ctx1->port 		 = port;
 	ctx1->ib_port 	 = ib_port;
 	ctx1->gidx 		 = gidx;
@@ -481,8 +489,11 @@ else
 			return 1;
 	}
 
+
 if(ctx1->client == 1)
 {
+	if(ctx1->mode == 0){
+	printf("In RDMA WRITE \n");
 	struct ibv_sge list;
 	struct ibv_send_wr wr;
 	struct ibv_send_wr *bad_wr;
@@ -507,7 +518,71 @@ if(ctx1->client == 1)
         return 1;
 	}
 	printf("post success \n");
+	}
+	
+	if(ctx1->mode == 1)
+	{
+		printf("In SEND/RECV \n");
+		struct ibv_sge list;
+		struct ibv_send_wr wr;
+		struct ibv_send_wr *bad_wr;
+
+		memset(&list,0,sizeof(list));
+		list.addr 	=  (uintptr_t)ctx1->buf;
+		list.length	=  ctx1->size;
+		list.lkey	=  ctx1->mr->lkey;
+
+		memset(&wr,0,sizeof(wr));
+		wr.wr_id		= 2;
+		wr.sg_list		= &list;
+		wr.num_sge		= 1;
+		wr.opcode		= IBV_WR_SEND;
+		wr.send_flags 	= IBV_SEND_SIGNALED;
+
+		if(ibv_post_send(ctx1->qp,&wr,&bad_wr))
+		{
+			fprintf(stderr, "Couldn't post send\n");
+        	return 1;
+		} 
+		printf("post success \n");
+	}
 }
+
+if(ctx1->client == 0)
+{
+	if(ctx1->mode == 0)
+	{
+		printf("In RDMA WRITE\n");
+	}
+
+	if(ctx1->mode == 1)
+	{
+		printf("In SEND/RECV");
+		struct ibv_sge list = {
+				.addr 	= (uintptr_t)ctx1->buf;
+				.length = ctx1->size;
+				.lkey	= ctx1->mr->lkey; 
+		}
+
+		struct ibv_recv_wr wr= {
+				.wr_id		=3;
+				.sg_list 	= &list;
+				.num_sge 	= 1;
+		}
+
+		struct ibv_recv_wr *bad_wr;
+		if(ibv_post_recv(ctx1->qp, &wr, &bad_wr))
+		{
+				fprintf(stderr, "Couldn't post recv\n");
+				return 1;
+		}
+		printf("post success\n");
+
+	}
+}
+
+
+
 	struct ibv_wc wc;
 	if(ibv_poll_cq(ctx1->cq_s.cq,1,&wc) >= 0)
 	{

@@ -58,6 +58,7 @@ static const struct krdma_option krdma_opts[] = {
  	{"read_inv", OPT_NOPARAM, 'R'},
  	{"fr", OPT_NOPARAM, 'f'},
     {"destaddr",OPT_STRING,'D'},
+    {"mode",OPT_INT,'m'},
 	{NULL, 0, 0}
 };
 
@@ -132,6 +133,7 @@ struct krdma_buf_info{
 
 struct krdma_cb{
         int server;
+        int mode; //0-write,1-send/recv
         struct ib_pd *pd;
         struct ib_cq *cq;
         struct ib_qp *qp;
@@ -199,99 +201,6 @@ struct krdma_cb{
         struct list_head list;
 
 };
-#if 0
-enum gid_table_entry_state {
-        GID_TABLE_ENTRY_INVALID         = 1,
-        GID_TABLE_ENTRY_VALID           = 2,
-        /*
-         * Indicates that entry is pending to be removed, there may
-         * be active users of this GID entry.
-         * When last user of the GID entry releases reference to it,
-         * GID entry is detached from the table.
-         */
-        GID_TABLE_ENTRY_PENDING_DEL     = 3,
-};
-
-struct ib_gid_table_entry {
-        struct kref                     kref;
-        struct work_struct              del_work;
-        struct ib_gid_attr              attr;
-        void                            *context;
-        enum gid_table_entry_state      state;
-};
-
-
-bool is_gid_entry_valid(struct ib_gid_table_entry *entry)
-{
-    return entry && entry->state == GID_TABLE_ENTRY_VALID;
-}
-
-static void get_gid_entry(struct ib_gid_table_entry *entry)
-{
-        kref_get(&entry->kref);
-}
-
-
-struct ib_gid_attr *rdma_find_gid_by_device(struct ib_device *ibdev, union ib_gid *gid, int port){
-            struct ib_gid_attr *res = NULL;
-            struct ib_gid_table *table;
-            unsigned long flags;
-
-            if(port >= rdma_start_port(ibdev) && port <= rdma_end_port(ibdev)){
-                printk("port valid \n");
-            }
-            else return NULL;
-
-            table = ibdev->cache.ports[port - rdma_start_port(ibdev)].gid;
-            if(table)
-                printk("find table\n");
-            else return NULL;
-
-            read_lock_irqsave(&table->rwlock, flags);
-            for (i = 0; i < table->sz; i++) {
-                struct ib_gid_table_entry *entry = table->data_vec[i];
-
-                if (!is_gid_entry_valid(entry))
-                        continue;
-
-                if (memcmp(gid, &entry->attr.gid, sizeof(*gid)))
-                        continue;
-
-                        get_gid_entry(entry);
-                        res = &entry->attr;
-                        break;
-        }
-            read_unlock_irqrestore(&table->rwlock, flags);
-
-            return res;
-}
-
-#endif
-
-int ib_resolve_eth_dmac(struct ib_device* ibdev,struct ib_qp_attr *qp_attr, int *qp_attr_mask)
-{
-        int           ret = 0;
-
-        if (*qp_attr_mask & IB_QP_AV) {
-                if (qp_attr->ah_attr.port_num < rdma_start_port(ibdev) ||
-                    qp_attr->ah_attr.port_num > rdma_end_port(ibdev))
-                        return -EINVAL;
-
-                if (!rdma_cap_eth_ah(ibdev, qp_attr->ah_attr.port_num))
-                        return 0;
-
-                if (rdma_link_local_addr((struct in6_addr *)qp_attr->ah_attr.grh.dgid.raw)) {
-                        rdma_get_ll_mac((struct in6_addr *)qp_attr->ah_attr.grh.dgid.raw,
-                                        qp_attr->ah_attr.roce.dmac);
-                }
-
-        }
-    return ret;
-}
-
-                
-
-
 
 int start_my_server(struct krdma_cb *cb, char *send_buf,int sendsize, char *recv_buf,int recvsize)
 {
@@ -336,18 +245,6 @@ int start_my_server(struct krdma_cb *cb, char *send_buf,int sendsize, char *recv
             return ret;
     }
     printk("server: accept, connection established\n");
-
-#if 0
-    char *recvbuf = NULL;
-    recvbuf = kmalloc(1024,GFP_KERNEL);
-    if(recvbuf == NULL)
-    {
-        printk("server: recvbuf kmalloc failed \n");
-        return -1;
-    }
-    memset(recvbuf,0,1024);
-#endif
-
 
     struct kvec vec;
     struct msghdr msg;
@@ -397,24 +294,7 @@ int start_my_client(struct krdma_cb *cb,char *send_buf,int sendsize ,char *recv_
    // char *recv_buf = NULL;
     struct kvec send_vec, recv_vec;
     struct msghdr send_msg, recv_msg;
-
-
     port_num = cb->port;
-
-#if 0
-    /* kmalloc a send buffer*/
-    send_buf = kmalloc(BUFFER_SIZE, GFP_KERNEL);
-    if (send_buf == NULL) {
-        printk("client: send_buf kmalloc error!\n");
-        return -1;
-    }
-    /* kmalloc a receive buffer*/
-    recv_buf = kmalloc(BUFFER_SIZE, GFP_KERNEL);
-    if(recv_buf == NULL){
-        printk("client: recv_buf kmalloc error!\n");
-        return -1;
-    }
-#endif
 
     memset(&s_addr, 0, sizeof(s_addr));
     s_addr.sin_family = AF_INET;
@@ -468,9 +348,6 @@ int start_my_client(struct krdma_cb *cb,char *send_buf,int sendsize ,char *recv_
     return 0;
 }
 
-
-
-
 static int reg_supported(struct ib_device *dev)
 {
 	u64 needed_flags = IB_DEVICE_MEM_MGT_EXTENSIONS;
@@ -496,7 +373,7 @@ static void fill_sockaddr(struct sockaddr_storage *sin, struct krdma_cb *cb)
 		memcpy((void *)&sin4->sin_addr.s_addr, cb->addr, 4);
 		sin4->sin_port = cb->port;
 	} else if (cb->addr_type == AF_INET6) {
-        #if 0
+        #if 0 //ip6 is not supported now
 		struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)sin;
 		sin6->sin6_family = AF_INET6;
 		memcpy((void *)&sin6->sin6_addr, cb->addr, 16);
@@ -604,9 +481,7 @@ static void krdma_run_server(struct krdma_cb *cb)
             printk("mapping error \n");
             goto error4;
     }
-
-    cb->page_list_len   = (((cb->size - 1) & PAGE_MASK) + PAGE_SIZE)>> PAGE_SHIFT;
-    
+ 
     cb->send_buf.rkey       = ibpd->unsafe_global_rkey; // get rkey
     cb->send_buf.lkey       = ibpd->local_dma_lkey;
 
@@ -641,7 +516,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     if(ret == 0)
     printk(" modify qp to INIT success. \n");//added by hs
     else 
-        {printk("modify qp failed \n");goto error4;}
+    {printk("modify qp failed \n");goto error4;}
 
 //for find mac 
     union ib_gid gid;
@@ -701,19 +576,8 @@ static void krdma_run_server(struct krdma_cb *cb)
     attr.ah_attr.grh.dgid       = qpinfo_c->gid;
     attr.ah_attr.grh.hop_limit  = 1;
     attr.ah_attr.grh.sgid_index = 3;
-    //memcpy(attr.ah_attr.roce.dmac,qpinfo_c->dmac,6);
-    //add src gid attr
-    // struct ib_gid_attr src_gid_attr;
-    // src_gid_attr.device      = ibdev;
-    // src_gid_attr.ndev        = ibdev->ops.get_netdev(ibdev,1);
-    // src_gid_attr.gid         = qpinfo->gid;
-    // src_gid_attr.gid_type    = IB_GID_TYPE_ROCE_UDP_ENCAP;
-    // src_gid_attr.index       = 2;
-    // src_gid_attr.port_num    = 1;
-    // attr.ah_attr.grh.sgid_attr = &src_gid_attr;
    
-   //attr.ah_attr.grh.sgid_attr = rdma_find_gid_by_device(ibdev,&qpinfo->gid,1);
-        // we pretend to make a incomming packet.
+    // we pretend to make a incomming packet.
     struct ib_wc wc; //we make a wc so we can configure a ah_attr for dest gid.
     memset(&wc,0,sizeof(wc));
     wc.sl = 0;
@@ -731,7 +595,6 @@ static void krdma_run_server(struct krdma_cb *cb)
     ip4h->saddr   = in_aton(cb->destaddr_str);
     ip4h->daddr   = in_aton(cb->addr_str);
     ip4h->check = ip_fast_csum((u8 *)ip4h,5);
-
     ret = ib_init_ah_attr_from_wc(ibdev,1,&wc,&grh,&attr.ah_attr);
     if(ret)
     {
@@ -796,6 +659,40 @@ static void krdma_run_server(struct krdma_cb *cb)
         printk("modify qp to rts success \n");
     else 
         {printk("modify qp rts failed \n"); goto error4;}
+
+
+    if(cb->mode == 1){
+        printk("In SEND/RECV MODE\n");
+    //post some recv wr.
+    struct ib_sge sg;
+    struct ib_recv_wr wr;
+    struct ib_recv_wr *bad_wr;
+
+    printk("dwcclient:Setting sg... \n");//added by hs
+    memset(&sg,0,sizeof(sg));
+    sg.addr =cb->send_dma_addr ;
+    printk("dwcclient:sg.addr is 0x%x\n",(uintptr_t)ctx2.dma_addr);//added by hs
+    sg.length =cb->send_buf.size;
+    sg.lkey = cb->send_buf.lkey;
+
+    printk("dwcclient:Working on IB Recv WR..\n");//added by hs
+    memset(&wr,0,sizeof(wr));
+    wr.wr_id =&wr;
+    wr.sg_list = &sg;
+    wr.num_sge = 1;
+
+    printk("dwcclient:Posting Recv .. \n");//added by hs
+    if(ib_post_recv(ibqp,&wr,&bad_wr)){
+            printk(KERN_INFO"Error posting recv .. \n");//added by hs
+            return -EINVAL;
+    }
+    }
+    
+    if(cb->mode == 0)
+    {
+        printk("In RDMA Write MODE\n");
+
+    }
 
 
     struct ib_wc wc1;
@@ -910,7 +807,7 @@ static void krdma_run_client(struct krdma_cb *cb)
     // memset(bufaddr,0x12345678,4);
     // printk("client:0x%x \n",*bufaddr);
      printk("start to alloc dma buf\n");
-    cb->send_buf.size   = 16;
+    cb->send_buf.size   = 17;
     cb->send_buf.buf    = bufaddr;
     memcpy(cb->send_buf.buf,"hello,myworld",16);
     printk("send buf: %s \n",cb->send_buf.buf);
@@ -1105,6 +1002,39 @@ static void krdma_run_client(struct krdma_cb *cb)
 
 
 
+if(cb->mode == 1){
+    printk("Client SEND/RECV \n");
+    struct ib_sge sg1;
+        struct ib_send_wr wr1;
+        struct ib_send_wr *bad_wr1;
+
+        printk("dwcclient:Setting sg... \n");//added by hs
+        memset(&sg1,0,sizeof(sg1));
+        sg1.addr =cb->send_dma_addr;
+        sg1.length = cb->send_buf.size;
+        sg1.lkey = cb->send_buf.lkey;
+
+        printk("dwcclient:Working on IB SEND WR..\n");//added by hs
+        memset(&wr1,0,sizeof(wr1));
+        wr1.wr_id =&wr1;
+        wr1.sg_list = &sg1;
+        wr1.num_sge = 1;
+        wr1.opcode = IB_WR_SEND;
+        wr1.send_flags = IB_SEND_SIGNALED;
+//      wr1.remote_addr =(uintptr_t) ctx2.dma_addr;
+//      wr1.rkey = ctx2.rkey;
+        printk("dwcclient:Posting Send .. \n");//added by hs
+        if(ib_post_send(ibqp,&wr1,&bad_wr1)){
+                printk(KERN_INFO"Error posting send .. \n");//added by hs
+                return -EINVAL;
+        }
+
+
+}
+
+if(cb->mode == 0){
+    printk("Client RDMA WRITE \n");
+
     //RDMA WRITE
     struct ib_sge sg1;
     struct ib_rdma_wr wr1;
@@ -1131,6 +1061,12 @@ static void krdma_run_client(struct krdma_cb *cb)
                 goto error4;
         }
 
+    }
+   
+   
+   
+   
+   
     struct ib_wc wc1;
     if(ib_poll_cq(ibcq,1,&wc1)>=0){
     if(wc1.status ==IB_WC_SUCCESS)
@@ -1138,19 +1074,12 @@ static void krdma_run_client(struct krdma_cb *cb)
     else
         {printk("Failur: %d \n",wc1.status); }//added by hs
     
-    }
-
-    printk("wc:wr_id: %d \n",wc1.wr_id);
-    printk("wc:opcode: 0x%x \n",wc1.opcode);
-    printk("wc:vendor_err: 0x%x \n",wc1.vendor_err);
-    printk("wc:byte_len: %d \n",wc1.byte_len);
-    printk("wc:src_qp: %d \n",wc1.src_qp);
-    printk("wc:wc_flags: %d\n",wc1.wc_flags);
-    printk("wc:pkey_index: %d \n",wc1.pkey_index);
-    printk("wc:port_num: %d \n",wc1.port_num);
 
 
-    printk("wc.status:%s\n",ib_wc_status_msg(wc1.status));
+
+
+
+
     printk("client send buf: %s \n",cb->send_buf.buf);
 
 
@@ -1288,6 +1217,9 @@ int krdma_doit(char *cmd)
                 cb->frtest = 1;
                 DEBUG_LOG("fast-reg test!\n");
                 break;
+             case 'm':
+                cb->mode = optint;
+                printk("mode is %d\n",optint);
              default:
                 printk("unknown opt %s\n", optarg);
                 ret = -EINVAL;
