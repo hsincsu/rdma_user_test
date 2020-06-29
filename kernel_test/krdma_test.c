@@ -1220,6 +1220,7 @@ int krdma_doit(char *cmd)
              case 'm':
                 cb->mode = optint;
                 printk("mode is %d\n",optint);
+                break;
              default:
                 printk("unknown opt %s\n", optarg);
                 ret = -EINVAL;
