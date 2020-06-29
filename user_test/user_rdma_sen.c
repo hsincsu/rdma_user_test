@@ -381,6 +381,43 @@ int main(int argc, char *argv[])
                   }
 	printf("modify qp init success\n");
 
+	//In init we can post recv first
+	if(ctx1->client == 0)
+{
+	if(ctx1->mode == 0)
+	{
+		printf("In RDMA WRITE\n");
+	}
+
+	if(ctx1->mode == 1)
+	{
+		printf("In SEND/RECV");
+		struct ibv_sge list = {
+				.addr 	= (uintptr_t)ctx1->buf,
+				.length = ctx1->size,
+				.lkey	= ctx1->mr->lkey 
+		};
+
+		struct ibv_recv_wr wr= {
+				.wr_id		=3,
+				.sg_list 	= &list,
+				.num_sge 	= 1,
+		};
+
+		struct ibv_recv_wr *bad_wr;
+		if(ibv_post_recv(ctx1->qp, &wr, &bad_wr))
+		{
+				fprintf(stderr, "Couldn't post recv\n");
+				return 1;
+		}
+		printf("post success\n");
+
+	}
+}
+
+
+
+
 	ret = ibv_query_gid(ctx1->context, ib_port, gidx, &ctx1->gid);
 
 	printf("query gid success\n");
@@ -469,43 +506,6 @@ else
                 return 1;
         }
 	
-	//In RTR ,we post recv;
-	if(ctx1->client == 0)
-{
-	if(ctx1->mode == 0)
-	{
-		printf("In RDMA WRITE\n");
-	}
-
-	if(ctx1->mode == 1)
-	{
-		printf("In SEND/RECV");
-		struct ibv_sge list = {
-				.addr 	= (uintptr_t)ctx1->buf,
-				.length = ctx1->size,
-				.lkey	= ctx1->mr->lkey 
-		};
-
-		struct ibv_recv_wr wr= {
-				.wr_id		=3,
-				.sg_list 	= &list,
-				.num_sge 	= 1,
-		};
-
-		struct ibv_recv_wr *bad_wr;
-		if(ibv_post_recv(ctx1->qp, &wr, &bad_wr))
-		{
-				fprintf(stderr, "Couldn't post recv\n");
-				return 1;
-		}
-		printf("post success\n");
-
-	}
-}
-
-
-
-
 
 
 		attr.qp_state       = IBV_QPS_RTS;
