@@ -518,6 +518,35 @@ static void krdma_run_server(struct krdma_cb *cb)
     else 
     {printk("modify qp failed \n");goto error4;}
 
+    //In init ,we can post recv
+     if(cb->mode == 1){
+        printk("In SEND/RECV MODE\n");
+    //post some recv wr.
+    struct ib_sge sg;
+    struct ib_recv_wr wr;
+    struct ib_recv_wr *bad_wr;
+
+    printk("dwcclient:Setting sg... \n");//added by hs
+    memset(&sg,0,sizeof(sg));
+    sg.addr =cb->send_dma_addr ;
+    printk("dwcclient:sg.addr is 0x%x\n",cb->send_dma_addr);//added by hs
+    sg.length =cb->send_buf.size;
+    sg.lkey = cb->send_buf.lkey;
+
+    printk("dwcclient:Working on IB Recv WR..\n");//added by hs
+    memset(&wr,0,sizeof(wr));
+    wr.wr_id =&wr;
+    wr.sg_list = &sg;
+    wr.num_sge = 1;
+
+    printk("dwcclient:Posting Recv .. \n");//added by hs
+    if(ib_post_recv(ibqp,&wr,&bad_wr)){
+            printk(KERN_INFO"Error posting recv .. \n");//added by hs
+            return -EINVAL;
+    }
+    }
+
+
 //for find mac 
     union ib_gid gid;
     memset(&gid,0,sizeof(union ib_gid));
@@ -659,34 +688,6 @@ static void krdma_run_server(struct krdma_cb *cb)
         printk("modify qp to rts success \n");
     else 
         {printk("modify qp rts failed \n"); goto error4;}
-
-
-    if(cb->mode == 1){
-        printk("In SEND/RECV MODE\n");
-    //post some recv wr.
-    struct ib_sge sg;
-    struct ib_recv_wr wr;
-    struct ib_recv_wr *bad_wr;
-
-    printk("dwcclient:Setting sg... \n");//added by hs
-    memset(&sg,0,sizeof(sg));
-    sg.addr =cb->send_dma_addr ;
-    printk("dwcclient:sg.addr is 0x%x\n",cb->send_dma_addr);//added by hs
-    sg.length =cb->send_buf.size;
-    sg.lkey = cb->send_buf.lkey;
-
-    printk("dwcclient:Working on IB Recv WR..\n");//added by hs
-    memset(&wr,0,sizeof(wr));
-    wr.wr_id =&wr;
-    wr.sg_list = &sg;
-    wr.num_sge = 1;
-
-    printk("dwcclient:Posting Recv .. \n");//added by hs
-    if(ib_post_recv(ibqp,&wr,&bad_wr)){
-            printk(KERN_INFO"Error posting recv .. \n");//added by hs
-            return -EINVAL;
-    }
-    }
 
     if(cb->mode == 0)
     {
