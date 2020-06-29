@@ -593,10 +593,11 @@ if(ctx1->client == 0)
 		return 1;
 	}
 
-if(ctx1->client == 0)
-	{printf("wait 5 seconds to read\n");sleep(5);}
-
 	printf("buf: %s \n",ctx1->buf);
+if(ctx1->client == 0)
+	{printf("wait 5 seconds to read\n");sleep(1);}
+
+	printf("buf wait: %s \n",ctx1->buf);
 
 
 clean_qp:
