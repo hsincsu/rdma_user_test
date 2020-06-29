@@ -559,16 +559,16 @@ if(ctx1->client == 0)
 	{
 		printf("In SEND/RECV");
 		struct ibv_sge list = {
-				.addr 	= (uintptr_t)ctx1->buf;
-				.length = ctx1->size;
-				.lkey	= ctx1->mr->lkey; 
-		}
+				.addr 	= (uintptr_t)ctx1->buf,
+				.length = ctx1->size,
+				.lkey	= ctx1->mr->lkey 
+		};
 
 		struct ibv_recv_wr wr= {
-				.wr_id		=3;
-				.sg_list 	= &list;
-				.num_sge 	= 1;
-		}
+				.wr_id		=3,
+				.sg_list 	= &list,
+				.num_sge 	= 1,
+		};
 
 		struct ibv_recv_wr *bad_wr;
 		if(ibv_post_recv(ctx1->qp, &wr, &bad_wr))
