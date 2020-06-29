@@ -1074,9 +1074,7 @@ if(cb->mode == 0){
     else
         {printk("Failur: %d \n",wc1.status); }//added by hs
     
-
-
-
+    }
 
 
 
