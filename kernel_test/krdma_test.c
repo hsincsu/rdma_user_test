@@ -47,10 +47,10 @@ static const struct krdma_option krdma_opts[] = {
 	{"server", OPT_NOPARAM, 's'},
 	{"client", OPT_NOPARAM, 'c'},
 	{"server_inv", OPT_NOPARAM, 'I'},
- 	{"wlat", OPT_NOPARAM, 'l'},
- 	{"rlat", OPT_NOPARAM, 'L'},
- 	{"bw", OPT_NOPARAM, 'B'},
- 	{"duplex", OPT_NOPARAM, 'd'},
+ 	//{"wlat", OPT_NOPARAM, 'l'},
+ 	//{"rlat", OPT_NOPARAM, 'L'},
+ 	//{"bw", OPT_NOPARAM, 'B'},
+ 	//{"duplex", OPT_NOPARAM, 'd'},
 	{"tos", OPT_INT, 't'},
  	{"txdepth", OPT_INT, 'T'},
  	{"poll", OPT_NOPARAM, 'P'},
@@ -1175,18 +1175,6 @@ int krdma_doit(char *cmd)
                 cb->validate++;
                 DEBUG_LOG("validate data\n");
                 break;
-             case 'l':
-                cb->wlat++;
-                break;
-             case 'L':
-                cb->rlat++;
-                break;
-             case 'B':
-                cb->bw++;
-                break;
-             case 'd':
-                cb->duplex++;
-                break;
              case 'D':
                 cb->destaddr_str = optarg;
                 in4_pton(optarg, -1, cb->destaddr, -1 ,NULL);
@@ -1217,7 +1205,7 @@ int krdma_doit(char *cmd)
                 break;
              case 'm':
                 cb->mode = optint;
-                printk("mode is %d\n",optint);
+                printk("mode is %d\n",cb->mode);
                 break;
              default:
                 printk("unknown opt %s\n", optarg);
