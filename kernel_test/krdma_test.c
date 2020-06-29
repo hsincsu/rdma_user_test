@@ -671,7 +671,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     printk("dwcclient:Setting sg... \n");//added by hs
     memset(&sg,0,sizeof(sg));
     sg.addr =cb->send_dma_addr ;
-    printk("dwcclient:sg.addr is 0x%x\n",(uintptr_t)ctx2.dma_addr);//added by hs
+    printk("dwcclient:sg.addr is 0x%x\n",cb->send_dma_addr);//added by hs
     sg.length =cb->send_buf.size;
     sg.lkey = cb->send_buf.lkey;
 
@@ -687,7 +687,7 @@ static void krdma_run_server(struct krdma_cb *cb)
             return -EINVAL;
     }
     }
-    
+
     if(cb->mode == 0)
     {
         printk("In RDMA Write MODE\n");
