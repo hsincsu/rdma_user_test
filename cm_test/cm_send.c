@@ -25,6 +25,7 @@
 #define PRINT_CM	   (unsigned int) 3
 #define PRINT_PGU	   (unsigned int) 4
 #define PRINT_PHD	   (unsigned int) 5
+#define DESTROY_ADDR   (unsigned int) 7
 
 ioctl_operation(int cmd, int *buf)
 {
@@ -103,7 +104,7 @@ while(1){
         {
             printf("read kernel addr \n");
             ioctl_operation(PRINT_PGU,(int *)buf);
-            printf("read value : %x\n",buf[3]);break;
+            printf("read value : %d\n",buf[3]);break;
         }
         case 6:
         {
@@ -112,10 +113,14 @@ while(1){
             scanf("%d",&buf[4]);
             ioctl_operation(PRINT_PHD,(int *)buf);break;
         }
+        case 7:
+        {
+            ioctl_operation(DESTROY_ADDR,(int *)buf);break;
+        }
         default:
             break;
     }
-    if(choose == 7)
+    if(choose == 8)
         break;
 
     }
