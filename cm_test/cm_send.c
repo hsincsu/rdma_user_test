@@ -89,7 +89,7 @@ while(1){
     {
         printf("wrong input \n");
     } 
-    fflush(stdin); //flush stdin space
+    setbuf(stdin,NULL); //flush stdin space
     }
 
     buf[0] = ntohl(inet_addr(ipaddr));
