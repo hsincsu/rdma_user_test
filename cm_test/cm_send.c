@@ -97,19 +97,19 @@ while(1){
         {
             printf("get kernel dma addr\n");
             ioctl_operation(PRINT_CM,(int *)buf);
-            printf("dma addr:%lx\n",buf[3]);break;
+            printf("dma addr:%lx\n",buf[2]);break;
         }
         case 5:
         {
             printf("read kernel addr \n");
             ioctl_operation(PRINT_PGU,(int *)buf);
-            printf("read value : %x\n",buf[4]);break;
+            printf("read value : %x\n",buf[3]);break;
         }
         case 6:
         {
             printf("write kernel addr\n");
             printf("write(integer):");
-            scanf("%d",&buf[5]);
+            scanf("%d",&buf[4]);
             ioctl_operation(PRINT_PHD,(int *)buf);break;
         }
         default:
