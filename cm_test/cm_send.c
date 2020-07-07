@@ -80,28 +80,28 @@ while(1){
         case 1:
         {
             printf("cm send \n");
-            ioctl_operation(KERNEL_CM_SEND,buf);break;
+            ioctl_operation(KERNEL_CM_SEND,(int *)buf);break;
         }
         case 2:
         {
             printf("cm recv \n");
-            ioctl_operation(KERNEL_CM_RECV,buf);break;
+            ioctl_operation(KERNEL_CM_RECV,(int *)buf);break;
         }
         case 3:
         {
             printf("print mac \n");
-            ioctl_operation(PRINT_MAC,buf);break;
+            ioctl_operation(PRINT_MAC,(int *)buf);break;
         }
         case 4:
         {
             printf("get kernel dma addr\n");
-            ioctl_operation(PRINT_CM,buf);break;
+            ioctl_operation(PRINT_CM,(int *)buf);break;
             printf("dma addr:%lx\n",buf[3]);
         }
         case 5:
         {
             printf("read kernel addr \n");
-            ioctl_operation(PRINT_PGU,buf);break;
+            ioctl_operation(PRINT_PGU,(int *)buf);break;
             printf("read value : %x\n",buf[4]);
         }
         case 6:
@@ -109,7 +109,7 @@ while(1){
             printf("write kernel addr\n");
             printf("write(integer):");
             scanf("%d",&buf[5]);
-            ioctl_operation(PRINT_PHD,buf);break;
+            ioctl_operation(PRINT_PHD,(int *)buf);break;
         }
         default:
             break;
