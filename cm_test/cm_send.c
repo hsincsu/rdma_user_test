@@ -43,24 +43,33 @@ ioctl_operation(int cmd, int *buf)
 int main(int argc, char *argv[])
 {
     int fd;
-    int buf[4];
+    uint64_t buf[5];
     int buflen;
     int data;    
     int choose;
     char *ipaddr;
 
     ipaddr = malloc(sizeof(8));
+    if(argc != 0)
     ipaddr = strdup(argv[1]);
+    else
+    {
+        ipaddr = "127.0.0.1";
+    }
     printf("destipaddr = %s \n",ipaddr);
 
-
 while(1){
-    printf("welcome to debug sys in sysfs(later change to debugfs):\n");
-    printf("1. CM SEND\n");
-    printf("2. CM RECV\n");
-    printf("3. PRINT MAC(use dmesg to check)\n");
-    printf("other function may support later\n");
-    printf("4. exit\n");
+    printf("\n");
+    printf("---------------------------------------------------------\n");
+    printf("| welcome to debug sys in sysfs(later change to debugfs)|\n");
+    printf("| 1. CM SEND                                            |\n");
+    printf("| 2. CM RECV                                            |\n");
+    printf("| 3. PRINT MAC(use dmesg to check)                      |\n");
+    printf("| 4. GET KERNEL DMA ADDR                                |\n");
+    printf("| 5. PRINT KERNEL ADDR VALUE                            |\n");
+    printf("| other function may support later                      |\n");
+    printf("| 6. exit                                               |\n");
+    printf("---------------------------------------------------------\n");
     printf("please choose:");
     scanf("%d",&choose);
 
@@ -83,10 +92,29 @@ while(1){
             printf("print mac \n");
             ioctl_operation(PRINT_MAC,buf);break;
         }
+        case 4:
+        {
+            printf("get kernel dma addr\n");
+            ioctl_operation(PRINT_CM,buf);break;
+            printf("dma addr:%lx\n",buf[3]);
+        }
+        case 5:
+        {
+            printf("read kernel addr \n");
+            ioctl_operation(PRINT_PGU,buf);break;
+            printf("read value : %x\n",buf[4]);
+        }
+        case 6:
+        {
+            printf("write kernel addr\n");
+            printf("write(integer):");
+            scanf("%d",&buf[5]);
+            ioctl_operation(PRINT_PHD,buf);break;
+        }
         default:
             break;
     }
-    if(choose == 4)
+    if(choose == 6)
         break;
 
     }
