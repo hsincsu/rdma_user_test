@@ -76,13 +76,19 @@ while(1){
 
     while(1){
     printf("please choose:");
-    if(scanf("%d",&choose) > 0)
+    if(scanf("%d",&choose) == 1 && choose > 0)
+    {
     if(1 <= choose && 8 >= choose )
         break;
     else
     {
         printf("please choose with number(1-8)\n");
     }
+    }
+    else
+    {
+        printf("wrong input \n");
+    } 
     fflush(stdin); //flush stdin space
     }
 
