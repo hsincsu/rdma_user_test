@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     char *ipaddr;
 
     ipaddr = malloc(sizeof(8));
-    if(argc != 0)
+    if(argc >= 2)
     ipaddr = strdup(argv[1]);
     else
     {
