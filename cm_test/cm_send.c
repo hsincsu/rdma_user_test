@@ -69,8 +69,9 @@ while(1){
     printf("| 4. GET KERNEL DMA ADDR                                |\n");
     printf("| 5. READ KERNEL ADDR VALUE                             |\n");
     printf("| 6. WRITE KERNEL ADDR VALUE                            |\n");
+    printf("| 7. destroy dma addr                                   |\n");
     printf("| other function may support later                      |\n");
-    printf("| 7. exit                                               |\n");
+    printf("| 8. exit                                               |\n");
     printf("---------------------------------------------------------\n");
     printf("please choose:");
     scanf("%d",&choose);
