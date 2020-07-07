@@ -66,9 +66,10 @@ while(1){
     printf("| 2. CM RECV                                            |\n");
     printf("| 3. PRINT MAC(use dmesg to check)                      |\n");
     printf("| 4. GET KERNEL DMA ADDR                                |\n");
-    printf("| 5. PRINT KERNEL ADDR VALUE                            |\n");
+    printf("| 5. READ KERNEL ADDR VALUE                             |\n");
+    printf("| 6. WRITE KERNEL ADDR VALUE                            |\n");
     printf("| other function may support later                      |\n");
-    printf("| 6. exit                                               |\n");
+    printf("| 7. exit                                               |\n");
     printf("---------------------------------------------------------\n");
     printf("please choose:");
     scanf("%d",&choose);
@@ -95,14 +96,14 @@ while(1){
         case 4:
         {
             printf("get kernel dma addr\n");
-            ioctl_operation(PRINT_CM,(int *)buf);break;
-            printf("dma addr:%lx\n",buf[3]);
+            ioctl_operation(PRINT_CM,(int *)buf);
+            printf("dma addr:%lx\n",buf[3]);break;
         }
         case 5:
         {
             printf("read kernel addr \n");
-            ioctl_operation(PRINT_PGU,(int *)buf);break;
-            printf("read value : %x\n",buf[4]);
+            ioctl_operation(PRINT_PGU,(int *)buf);
+            printf("read value : %x\n",buf[4]);break;
         }
         case 6:
         {
@@ -114,7 +115,7 @@ while(1){
         default:
             break;
     }
-    if(choose == 6)
+    if(choose == 7)
         break;
 
     }
