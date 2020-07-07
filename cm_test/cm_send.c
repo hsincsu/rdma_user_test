@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
     uint64_t buf[5];
     int buflen;
     int data;    
-    int choose;
+    int choose = 0;
     char *ipaddr;
 
     ipaddr = malloc(sizeof(8));
@@ -74,7 +74,16 @@ while(1){
     printf("| 8. exit                                               |\n");
     printf("---------------------------------------------------------\n");
     printf("please choose:");
+    while(1){
     scanf("%d",&choose);
+    if(1 <= choose && 8 >= choose )
+        break;
+    else
+    {
+        printf("please choose with number(1-8)\n");
+    }
+    
+    }
 
     buf[0] = ntohl(inet_addr(ipaddr));
 
