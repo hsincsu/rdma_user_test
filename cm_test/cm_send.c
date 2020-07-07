@@ -76,14 +76,14 @@ while(1){
 
     while(1){
     printf("please choose:");
-    scanf("%d",&choose);
+    if(scanf("%d",&choose) > 0)
     if(1 <= choose && 8 >= choose )
         break;
     else
     {
         printf("please choose with number(1-8)\n");
     }
-    
+    fflush(stdin); //flush stdin space
     }
 
     buf[0] = ntohl(inet_addr(ipaddr));
