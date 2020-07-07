@@ -73,8 +73,9 @@ while(1){
     printf("| other function may support later                      |\n");
     printf("| 8. exit                                               |\n");
     printf("---------------------------------------------------------\n");
-    printf("please choose:");
+
     while(1){
+    printf("please choose:");
     scanf("%d",&choose);
     if(1 <= choose && 8 >= choose )
         break;
