@@ -76,6 +76,7 @@ struct pingpong_context {
 
 struct addr_info{
 		char *remote_addr;
+		uint64_t dmaaddr;
 		uint64_t size;
 		uint64_t rkey;
 }__attribute__ ((packed));;
@@ -488,13 +489,15 @@ int main(int argc, char *argv[])
 	qpinfo->qpn = ctx1->qp->qp_num;
 	qpinfo->qkey = 0;
 	qpinfo->pkey = 0;
-	qpinfo->addr.remote_addr = ctx1->dmaaddr;
+	qpinfo->addr.remote_addr = ctx1->buf;
+	qpinfo->addr.dmaaddr 	 = ctx1->dmaaddr;
 	qpinfo->addr.size 		 = ctx1->size;
 	qpinfo->addr.rkey		 = ctx1->mr->rkey;
 	memcpy(&qpinfo->gid,&ctx1->gid,sizeof(union ibv_gid));
 
 	printf("client: qpn : 0x%x \n",qpinfo->qpn);
     printf("client: addr : 0x%lx \n",qpinfo->addr.remote_addr);
+	printf("client: dmaaddr : 0x%lx \n",qpinfo->addr.dmaaddr);
     printf("client: size : 0x%lx \n",qpinfo->addr.size);
     printf("client: rkey : 0x%lx \n",qpinfo->addr.rkey);
 
@@ -510,6 +513,7 @@ if(ctx1->client == 1){
     printf("server: qkey:0x %x \n",qpinfo_r->qkey);
     printf("server: pkey: 0x %x \n",qpinfo_r->pkey);
     printf("server: addr : 0x%lx \n",qpinfo_r->addr.remote_addr);
+	printf("server: dmaaddr : 0x%lx \n",qpinfo_r->addr.dmaaddr);
     printf("server: size : 0x%lx \n",qpinfo_r->addr.size);
     printf("server: rkey : 0x%lx \n",qpinfo_r->addr.rkey);
 	 printf("gid:");
@@ -528,6 +532,7 @@ else
     printf("client: qkey:0x %x \n",qpinfo_r->qkey);
     printf("client: pkey: 0x %x \n",qpinfo_r->pkey);
     printf("client: addr : 0x%lx \n",qpinfo_r->addr.remote_addr);
+	printf("client: dmaaddr : 0x%lx \n",qpinfo_r->addr.dmaaddr);
     printf("client: size : 0x%lx \n",qpinfo_r->addr.size);
     printf("client: rkey : 0x%lx \n",qpinfo_r->addr.rkey);
 	
@@ -601,7 +606,7 @@ if(ctx1->client == 1)
 	wr.num_sge		=   1;
 	wr.opcode		=   IBV_WR_RDMA_WRITE;
 	wr.send_flags 	= 	IBV_SEND_SIGNALED;
-	wr.wr.rdma.remote_addr = (uintptr_t)qpinfo_r->addr.remote_addr;
+	wr.wr.rdma.remote_addr = qpinfo_r->addr.dmaaddr;//(uintptr_t)qpinfo_r->addr.remote_addr;
 	wr.wr.rdma.rkey	= 	qpinfo_r->addr.rkey;
 
 	if(ibv_post_send(ctx1->qp,&wr,&bad_wr))
