@@ -485,7 +485,7 @@ int main(int argc, char *argv[])
 	qpinfo->qpn = ctx1->qp->qp_num;
 	qpinfo->qkey = 0;
 	qpinfo->pkey = 0;
-	qpinfo->addr.remote_addr = ctx1->buf;
+	qpinfo->addr.remote_addr = ctx1->dmaaddr;
 	qpinfo->addr.size 		 = ctx1->size;
 	qpinfo->addr.rkey		 = ctx1->mr->rkey;
 	memcpy(&qpinfo->gid,&ctx1->gid,sizeof(union ibv_gid));
@@ -649,10 +649,17 @@ if(ctx1->client == 1)
 	}
 
 	printf("buf: %s \n",ctx1->buf);
+
+	ioctl_operation(PRINT_PGU,(int *)buf);
+	printf("kernel buf: %d\n",buf[3]);
 if(ctx1->client == 0)
 	{printf("wait 5 seconds to read\n");sleep(1);}
 
 	printf("buf wait: %s \n",ctx1->buf);
+
+
+	ioctl_operation(PRINT_PGU,(int *)buf);
+	printf("kernel buf wait: %d\n",buf[3]);
 
 
 clean_qp:
