@@ -705,9 +705,12 @@ static void krdma_run_server(struct krdma_cb *cb)
         else
         {printk("Failur: %d \n",wc1.status);}//added by h
         }
+        for(int i = 0; i < 255; i++)
+        {
         msleep(2000);
         printk("server send buf: %s \n",cb->send_buf.buf);
-
+        memset(cb->send_buf.buf,0,16);
+        }
 
 error4:
     kfree(bufaddr);
@@ -1034,6 +1037,8 @@ if(cb->mode == 1){
 }
 
 if(cb->mode == 0){
+
+    for(i = 0 ;i < 255;i++){
     printk("Client RDMA WRITE \n");
 
     //RDMA WRITE
@@ -1061,7 +1066,22 @@ if(cb->mode == 0){
                 printk("Error posting send .. \n");//added by hs
                 goto error4;
         }
-
+    
+    printk("sleep 2 seconds\n");
+    msleep(2000);
+    printk("write again\n");
+    memset(cb->send_buf.buf,0,16);
+    if(i%2 == 0){
+    memcpy(cb->send_buf.buf,"hello,myworld",16);
+    printk("send buf: %s \n",cb->send_buf.buf);
+    }  
+    else 
+    {
+    memcpy(cb->send_buf.buf,"hello,myworld2",16);
+    printk("send buf: %s \n",cb->send_buf.buf);
+    }
+    }
+    
     }
    
    
