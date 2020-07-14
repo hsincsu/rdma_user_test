@@ -710,7 +710,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         {
         msleep(2000);
         printk("server send buf: %s \n",cb->send_buf.buf);
-        memset(cb->send_buf.buf,0,16);
+        memset(cb->send_buf.buf,0,20);
         }
 
 error4:
