@@ -706,7 +706,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         {printk("Failur: %d \n",wc1.status);}//added by h
         }
 
-        for(i = 0; i < 255; i++)
+        for(i = 0; i < 512; i++)
         {
         msleep(2000);
         printk("server send buf: %s \n",cb->send_buf.buf);
