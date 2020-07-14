@@ -472,7 +472,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     bufaddr             = kzalloc(4096,GFP_KERNEL);
     cb->send_buf.buf    = bufaddr;
     printk("start to alloc dma buf\n");
-    cb->send_buf.size   = 17;
+    cb->send_buf.size   =20;
     printk("end of alloc dma buf \n");
     printk("server send buf: %s \n",cb->send_buf.buf);
     cb->send_dma_addr       = ib_dma_map_single(ibdev,cb->send_buf.buf,4096, DMA_BIDIRECTIONAL);
@@ -705,6 +705,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         else
         {printk("Failur: %d \n",wc1.status);}//added by h
         }
+
         for(i = 0; i < 255; i++)
         {
         msleep(2000);
@@ -1038,7 +1039,7 @@ if(cb->mode == 1){
 
 if(cb->mode == 0){
 
-    for(i = 0 ;i < 255;i++){
+    for(i = 0 ;i < 512;i++){
     printk("Client RDMA WRITE \n");
 
     //RDMA WRITE
@@ -1072,12 +1073,14 @@ if(cb->mode == 0){
     printk("write again\n");
     memset(cb->send_buf.buf,0,16);
     if(i%2 == 0){
-    memcpy(cb->send_buf.buf,"hello,myworld",16);
+    snprintf(cb->send_buf.buf,20,"%s,%d","hello,world",i);
+    cb->send_buf.size = 20;
     printk("send buf: %s \n",cb->send_buf.buf);
     }  
     else 
     {
-    memcpy(cb->send_buf.buf,"hello,myworld2",16);
+    snprintf(cb->send_buf.buf,20,"%s,%d","hello,world2",i);
+    cb->send_buf.size = 20;
     printk("send buf: %s \n",cb->send_buf.buf);
     }
     }
