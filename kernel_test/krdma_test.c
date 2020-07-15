@@ -520,6 +520,9 @@ static void krdma_run_server(struct krdma_cb *cb)
 
     //In init ,we can post recv
      if(cb->mode == 1){
+
+    for(i = 0 ; i< 256; i++)
+    {
         printk("In SEND/RECV MODE\n");
     //post some recv wr.
     struct ib_sge sg;
@@ -692,7 +695,22 @@ static void krdma_run_server(struct krdma_cb *cb)
     if(cb->mode == 0)
     {
         printk("In RDMA Write MODE\n");
+        for(i = 0; i < 512; i++)
+        {
+        msleep(2000);
+        printk("server send buf: %s \n",cb->send_buf.buf);
+        memset(cb->send_buf.buf,0,20);
+        }
 
+    }
+    else{
+        for(i = 0; i < 256; i++)
+        {
+        printk("In SEND/RECV MODE\n");
+        msleep(2000);
+        printk("server send buf: %s \n",cb->send_buf.buf);
+        memset(cb->send_buf.buf,0,20);
+        }
     }
 
 
@@ -704,13 +722,6 @@ static void krdma_run_server(struct krdma_cb *cb)
         }
         else
         {printk("Failur: %d \n",wc1.status);}//added by h
-        }
-
-        for(i = 0; i < 512; i++)
-        {
-        msleep(2000);
-        printk("server send buf: %s \n",cb->send_buf.buf);
-        memset(cb->send_buf.buf,0,20);
         }
 
 error4:
@@ -1008,6 +1019,9 @@ static void krdma_run_client(struct krdma_cb *cb)
 
 
 if(cb->mode == 1){
+
+    for(i = 0; i< 256; i++)
+    {
     printk("Client SEND/RECV \n");
     struct ib_sge sg1;
         struct ib_send_wr wr1;
@@ -1033,6 +1047,25 @@ if(cb->mode == 1){
                 printk(KERN_INFO"Error posting send .. \n");//added by hs
                 return -EINVAL;
         }
+         
+        printk("sleep 2 seconds\n");
+        msleep(2000);
+        printk("write again\n");
+        memset(cb->send_buf.buf,0,20);
+        if(i%2 == 0){
+        snprintf(cb->send_buf.buf,20,"%s,%d","hello,world",i);
+        cb->send_buf.size = 20;
+        printk("send buf: %s \n",cb->send_buf.buf);
+        }  
+        else 
+        {
+        snprintf(cb->send_buf.buf,20,"%s,%d","hello,world",i);
+        cb->send_buf.size = 20;
+        printk("send buf: %s \n",cb->send_buf.buf);
+        }
+
+
+    }
 
 
 }
@@ -1079,10 +1112,11 @@ if(cb->mode == 0){
     }  
     else 
     {
-    snprintf(cb->send_buf.buf,20,"%s,%d","hello,world2",i);
+    snprintf(cb->send_buf.buf,20,"%s,%d","hello,world",i);
     cb->send_buf.size = 20;
     printk("send buf: %s \n",cb->send_buf.buf);
     }
+    
     }
     
     }
