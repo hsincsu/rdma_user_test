@@ -521,7 +521,7 @@ static void krdma_run_server(struct krdma_cb *cb)
     //In init ,we can post recv
      if(cb->mode == 1){
 
-    for(i = 0 ; i< 256; i++)
+    for(i = 0 ; i< 510; i++)
     {
         printk("In SEND/RECV MODE\n");
     //post some recv wr.
@@ -705,7 +705,7 @@ static void krdma_run_server(struct krdma_cb *cb)
 
     }
     else{
-        for(i = 0; i < 256; i++)
+        for(i = 0; i < 510; i++)
         {
         printk("In SEND/RECV MODE\n");
         msleep(2000);
@@ -1021,7 +1021,7 @@ static void krdma_run_client(struct krdma_cb *cb)
 
 if(cb->mode == 1){
 
-    for(i = 0; i< 256; i++)
+    for(i = 0; i< 510; i++)
     {
     printk("Client SEND/RECV \n");
     struct ib_sge sg1;
