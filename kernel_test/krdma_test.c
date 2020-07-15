@@ -548,6 +548,7 @@ static void krdma_run_server(struct krdma_cb *cb)
             return -EINVAL;
     }
     }
+     }
 
 
 //for find mac 
@@ -1063,12 +1064,12 @@ if(cb->mode == 1){
         cb->send_buf.size = 20;
         printk("send buf: %s \n",cb->send_buf.buf);
         }
-
+        }
 
     }
 
 
-}
+
 
 if(cb->mode == 0){
 
