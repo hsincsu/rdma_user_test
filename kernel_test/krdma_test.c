@@ -1071,7 +1071,7 @@ if(cb->mode == 0){
     printk("sleep 2 seconds\n");
     msleep(2000);
     printk("write again\n");
-    memset(cb->send_buf.buf,0,16);
+    memset(cb->send_buf.buf,0,20);
     if(i%2 == 0){
     snprintf(cb->send_buf.buf,20,"%s,%d","hello,world",i);
     cb->send_buf.size = 20;
