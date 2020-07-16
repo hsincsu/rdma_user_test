@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
 	//get opt
 	unsigned int port = 8888;
 	int 	  ib_port = 1;
-	unsigned int size = 17;
+	unsigned int size = 20;
 	int       	 gidx = 2;
 	int 		client= 0;
 	int			mode  = 0;
@@ -391,6 +391,8 @@ int main(int argc, char *argv[])
 
 	if(ctx1->mode == 1)
 	{
+		for(i = 0; i< 510; i++)
+		{
 		printf("In SEND/RECV");
 		struct ibv_sge list = {
 				.addr 	= (uintptr_t)ctx1->buf,
@@ -399,7 +401,7 @@ int main(int argc, char *argv[])
 		};
 
 		struct ibv_recv_wr wr= {
-				.wr_id		=3,
+				.wr_id		= &list,
 				.sg_list 	= &list,
 				.num_sge 	= 1,
 		};
@@ -411,7 +413,8 @@ int main(int argc, char *argv[])
 				return 1;
 		}
 		printf("post success\n");
-
+		
+		}
 	}
 }
 
@@ -542,7 +545,7 @@ if(ctx1->client == 1)
 	list.lkey	=  ctx1->mr->lkey;
 
 	memset(&wr,0,sizeof(wr));
-	wr.wr_id		= 	1;
+	wr.wr_id		= 	&wr;
 	wr.sg_list		= 	&list;
 	wr.num_sge		=   1;
 	wr.opcode		=   IBV_WR_RDMA_WRITE;
@@ -560,6 +563,8 @@ if(ctx1->client == 1)
 	
 	if(ctx1->mode == 1)
 	{
+		for(i = 0;i < 510 ;i++)
+		{
 		printf("In SEND/RECV \n");
 		struct ibv_sge list;
 		struct ibv_send_wr wr;
@@ -571,7 +576,7 @@ if(ctx1->client == 1)
 		list.lkey	=  ctx1->mr->lkey;
 
 		memset(&wr,0,sizeof(wr));
-		wr.wr_id		= 2;
+		wr.wr_id		= &wr;
 		wr.sg_list		= &list;
 		wr.num_sge		= 1;
 		wr.opcode		= IBV_WR_SEND;
@@ -583,6 +588,20 @@ if(ctx1->client == 1)
         	return 1;
 		} 
 		printf("post success \n");
+		printf("sleep 2 seconds\n");
+        usleep(100000);
+        printf("write again\n");
+        memset(ctx1->buf,0,20);
+        if(i%2 == 0){
+        snprintf(ctx1->buf,20,"%s,%d","hello,world",i);
+        printf("send buf: %s \n",ctx1->buf);
+        }  
+        else 
+        {
+        snprintf(ctx1->buf,20,"%s,%d","hello,world",i);
+        printf("send buf: %s \n",cb->send_buf.buf);
+        }
+		}
 	}
 }
 
@@ -599,10 +618,16 @@ if(ctx1->client == 1)
 
 	printf("buf: %s \n",ctx1->buf);
 if(ctx1->client == 0)
-	{printf("wait 5 seconds to read\n");sleep(1);}
+	{
+	printf("wait 5 seconds to read\n");
+	usleep(100000);
 
+	for(i =0 ;i< 510;i++){
+	memset(ctx1->buf,0,ctx1->size);
 	printf("buf wait: %s \n",ctx1->buf);
-
+	usleep(100000);
+	}
+	}
 
 clean_qp:
 	ibv_destroy_qp(ctx1->qp);
