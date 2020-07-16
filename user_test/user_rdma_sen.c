@@ -599,7 +599,7 @@ if(ctx1->client == 1)
         else 
         {
         snprintf(ctx1->buf,20,"%s,%d","hello,world",i);
-        printf("send buf: %s \n",cb->send_buf.buf);
+        printf("send buf: %s \n",ctx1->buf);
         }
 		}
 	}
