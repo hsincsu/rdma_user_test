@@ -401,7 +401,7 @@ int main(int argc, char *argv[])
 		};
 
 		struct ibv_recv_wr wr= {
-				.wr_id		= &list,
+				.wr_id		= 1,
 				.sg_list 	= &list,
 				.num_sge 	= 1,
 		};
@@ -545,7 +545,7 @@ if(ctx1->client == 1)
 	list.lkey	=  ctx1->mr->lkey;
 
 	memset(&wr,0,sizeof(wr));
-	wr.wr_id		= 	&wr;
+	wr.wr_id		= 	3;
 	wr.sg_list		= 	&list;
 	wr.num_sge		=   1;
 	wr.opcode		=   IBV_WR_RDMA_WRITE;
@@ -576,7 +576,7 @@ if(ctx1->client == 1)
 		list.lkey	=  ctx1->mr->lkey;
 
 		memset(&wr,0,sizeof(wr));
-		wr.wr_id		= &wr;
+		wr.wr_id		= 4;
 		wr.sg_list		= &list;
 		wr.num_sge		= 1;
 		wr.opcode		= IBV_WR_SEND;
