@@ -623,7 +623,6 @@ if(ctx1->client == 0)
 	usleep(100000);
 
 	for(i =0 ;i< 510;i++){
-	memset(ctx1->buf,0,ctx1->size);
 	printf("buf wait: %s \n",ctx1->buf);
 	usleep(100000);
 	}
