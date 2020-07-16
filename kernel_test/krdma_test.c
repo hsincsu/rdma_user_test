@@ -698,7 +698,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         printk("In RDMA Write MODE\n");
         for(i = 0; i < 512; i++)
         {
-        msleep(2000);
+        msleep(100);
         printk("server send buf: %s \n",cb->send_buf.buf);
         memset(cb->send_buf.buf,0,20);
         }
@@ -708,7 +708,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         for(i = 0; i < 510; i++)
         {
         printk("In SEND/RECV MODE\n");
-        msleep(2000);
+        msleep(100);
         printk("server send buf: %s \n",cb->send_buf.buf);
         memset(cb->send_buf.buf,0,20);
         }
@@ -1050,7 +1050,7 @@ if(cb->mode == 1){
         }
          
         printk("sleep 2 seconds\n");
-        msleep(2000);
+        msleep(100);
         printk("write again\n");
         memset(cb->send_buf.buf,0,20);
         if(i%2 == 0){
@@ -1103,7 +1103,7 @@ if(cb->mode == 0){
         }
     
     printk("sleep 2 seconds\n");
-    msleep(2000);
+    msleep(100);
     printk("write again\n");
     memset(cb->send_buf.buf,0,20);
     if(i%2 == 0){
