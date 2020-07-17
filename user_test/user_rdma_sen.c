@@ -629,6 +629,7 @@ if(ctx1->client == 0)
 	printf("wait 5 seconds to read\n");
 	usleep(25000);
 
+	number = number * 1.5;
 	for(i =0 ;i< number;i++){
 	printf("buf wait: %s \n",ctx1->buf);
 	usleep(25000);
