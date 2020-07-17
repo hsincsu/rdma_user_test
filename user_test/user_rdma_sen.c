@@ -408,7 +408,7 @@ int main(int argc, char *argv[])
 		};
 
 		struct ibv_recv_wr wr= {
-				.wr_id		= 1,
+				.wr_id		= (int)&list,
 				.sg_list 	= &list,
 				.num_sge 	= 1,
 		};
@@ -600,12 +600,12 @@ if(ctx1->client == 1)
         printf("write again\n");
         memset(ctx1->buf,0,size);
         if(i%2 == 0){
-        snprintf(ctx1->buf,size,"%s,%d","hello,world",i);
+        snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
         printf("send buf: %s \n",ctx1->buf);
         }  
         else 
         {
-        snprintf(ctx1->buf,size,"%s,%d","hello,world",i);
+        snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
         printf("send buf: %s \n",ctx1->buf);
         }
 		}
