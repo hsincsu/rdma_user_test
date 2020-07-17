@@ -218,6 +218,7 @@ int main(int argc, char *argv[])
 	int       	 gidx = 2;
 	int 		client= 0;
 	int			mode  = 0;
+	int 		number= 20;
 	char  *servername = NULL;
 	char  *ib_devname = NULL;
 
@@ -231,9 +232,10 @@ int main(int argc, char *argv[])
 						{ .name = "client",   .has_arg = 1, .val = 'c' },
 						{ .name = "ib-dev",	  .has_arg = 1, .val = 'd' },
 						{ .name = "mode",	  .has_arg = 1, .val = 'm' },
+		 				{ .name = "number",   .has_arg = 1, .val = 'n' },
                         {}
                 };
-		 c = getopt_long(argc,argv,"p:i:s:g:c:d:m:",long_options,NULL);
+		 c = getopt_long(argc,argv,"p:i:s:g:c:d:m:n:",long_options,NULL);
 
 		 if(c == -1)
 		 	break;
@@ -270,6 +272,8 @@ int main(int argc, char *argv[])
 			 case 'm':
 					mode = strtol(optarg,NULL,0);
 					break;
+			 case 'n':
+			 		number = strtol(optarg,NULL,0);
 			 default:
 			 		usage(argv[0]);
 					 return 1;
@@ -292,6 +296,7 @@ int main(int argc, char *argv[])
 	printf("size: 0x%x \n",size);
 	printf("gidx: 0x%x \n",gidx);
 	printf("servername: %s\n",servername);
+	printf("number: 0x%x \n",number);
 
 
 	dev_list = ibv_get_device_list(NULL);
@@ -391,7 +396,7 @@ int main(int argc, char *argv[])
 
 	if(ctx1->mode == 1)
 	{
-		for(i = 0; i< 510; i++)
+		for(i = 0; i< number; i++)
 		{
 		printf("In SEND/RECV");
 		struct ibv_sge list = {
@@ -563,7 +568,7 @@ if(ctx1->client == 1)
 	
 	if(ctx1->mode == 1)
 	{
-		for(i = 0;i < 510 ;i++)
+		for(i = 0;i < number ;i++)
 		{
 		printf("In SEND/RECV \n");
 		struct ibv_sge list;
@@ -622,7 +627,7 @@ if(ctx1->client == 0)
 	printf("wait 5 seconds to read\n");
 	usleep(25000);
 
-	for(i =0 ;i< 510;i++){
+	for(i =0 ;i< number;i++){
 	printf("buf wait: %s \n",ctx1->buf);
 	usleep(25000);
 	}
