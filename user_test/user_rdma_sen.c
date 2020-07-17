@@ -596,7 +596,7 @@ if(ctx1->client == 1)
 		} 
 		printf("post success \n");
 		printf("sleep 2 seconds\n");
-       	usleep(25000);
+       	usleep(250000);
         printf("write again\n");
         memset(ctx1->buf,0,size);
         if(i%2 == 0){
@@ -627,12 +627,12 @@ if(ctx1->client == 1)
 if(ctx1->client == 0)
 	{
 	printf("wait 5 seconds to read\n");
-	usleep(25000);
+	usleep(250000);
 
 	number = number * 1.5;
 	for(i =0 ;i< number;i++){
 	printf("buf wait: %s \n",ctx1->buf);
-	usleep(25000);
+	usleep(250000);
 	}
 	}
 
