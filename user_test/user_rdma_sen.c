@@ -86,7 +86,7 @@ static void usage(const char *argv0)
         printf("  -g, --gid-idx=<gid index> local port gid index\n");
 		printf("  -c, --client=(0/1)	 0-for server mode(default), 1-for client mode\n");
 		printf("  -m, --mode=(0/1)		 0-RDMA_WRITE, 1-SEND/RECV\n");
-		printf("  -n, --number     		 number of packet to send /recv \n")
+		printf("  -n, --number     		 number of packet to send /recv \n");
 }
 
 int start_my_server(struct pingpong_context *ctx,char *send_buf,int sendsize ,char *recv_buf,int recvsize)
