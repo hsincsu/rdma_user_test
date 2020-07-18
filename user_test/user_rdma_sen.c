@@ -613,16 +613,6 @@ if(ctx1->client == 1)
 }
 
 
-	struct ibv_wc wc;
-	if(ibv_poll_cq(ctx1->cq_s.cq,1,&wc) >= 0)
-	{
-		printf("poll success\n");
-	}
-	else{
-		printf("poll wrong\n");
-		return 1;
-	}
-
 	printf("buf: %s \n",ctx1->buf);
 if(ctx1->client == 0)
 	{
@@ -634,6 +624,16 @@ if(ctx1->client == 0)
 	printf("buf wait: %s \n",ctx1->buf);
 	usleep(250000);
 	}
+	}
+	
+	struct ibv_wc wc;
+	if(ibv_poll_cq(ctx1->cq_s.cq,1,&wc) >= 0)
+	{
+		printf("poll success\n");
+	}
+	else{
+		printf("poll wrong\n");
+		return 1;
 	}
 
 clean_qp:
