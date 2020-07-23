@@ -540,6 +540,8 @@ else
 
 if(ctx1->client == 1)
 {
+	for(i = 0;i < number ;i++)
+	{
 	if(ctx1->mode == 0){
 	printf("In RDMA WRITE \n");
 	struct ibv_sge list;
@@ -566,6 +568,21 @@ if(ctx1->client == 1)
         return 1;
 	}
 	printf("post success \n");
+	}
+	printf("sleep 2 seconds\n");
+	usleep(250000);
+	printf("write again\n");
+	memset(ctx1->buf,0,size);
+	if(i%2 == 0){
+	snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
+	printf("send buf: %s \n",ctx1->buf);
+	}  
+	else 
+	{
+	snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
+	printf("send buf: %s \n",ctx1->buf);
+	}
+
 	}
 	
 	if(ctx1->mode == 1)
