@@ -709,7 +709,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         {
         printk("In SEND/RECV MODE\n");
         msleep(100);
-        printk("server send buf: %s \n",cb->send_buf.buf);
+        printk("%d ,server send buf: %s \n",cb->port,cb->send_buf.buf);
         memset(cb->send_buf.buf,0,20);
         }
     }
@@ -719,7 +719,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         if(ib_poll_cq(ibcq,1,&wc1)>=0){
         if(wc1.status ==IB_WC_SUCCESS)
         {printk("Successful \n");//added by hs           
-        printk("send buf: 0x%x \n",*cb->send_buf.buf);
+        printk("%d send buf: 0x%x \n",cb->port,*cb->send_buf.buf);
         }
         else
         {printk("Failur: %d \n",wc1.status);}//added by h
