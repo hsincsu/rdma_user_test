@@ -699,7 +699,7 @@ static void krdma_run_server(struct krdma_cb *cb)
         for(i = 0; i < 400; i++)
         {
         msleep(100);
-        printk("server send buf: %s \n",cb->send_buf.buf);
+        printk("%d,server send buf: %s \n",cb->port,cb->send_buf.buf);
         memset(cb->send_buf.buf,0,20);
         }
 
