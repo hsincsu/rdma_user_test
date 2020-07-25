@@ -639,6 +639,7 @@ if(ctx1->client == 0)
 	number = number * 1.5;
 	for(i =0 ;i< number;i++){
 	printf("buf wait: %s \n",ctx1->buf);
+	memset(ctx1->buf,0,16);
 	usleep(250000);
 	}
 	}
