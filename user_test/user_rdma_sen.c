@@ -569,7 +569,7 @@ if(ctx1->client == 1)
         return 1;
 	}
 	printf("post success \n");
-	}
+	
 	printf("sleep 2 seconds\n");
 	usleep(250000);
 	printf("write again\n");
@@ -583,8 +583,11 @@ if(ctx1->client == 1)
 	snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
 	printf("send buf: %s \n",ctx1->buf);
 	}
-
+	
 	}
+	
+	}
+	
 	
 	if(ctx1->mode == 1)
 	{
