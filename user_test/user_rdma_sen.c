@@ -106,6 +106,13 @@ int start_my_server(struct pingpong_context *ctx,char *send_buf,int sendsize ,ch
 		clienaddr.sin_family = AF_INET;
 		clienaddr.sin_port 	 = htons(ctx->port);
 		clienaddr.sin_addr.s_addr = inet_addr(ctx->servername);
+		int on = 1;
+
+		if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int)) < 0)
+		{
+			printf("set error\n");
+			exit(0);
+		}
 
 		if(bind(sockfd,(struct sockaddr *)&clienaddr,sizeof(clienaddr)) == -1)
 		{
