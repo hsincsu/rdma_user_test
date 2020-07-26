@@ -334,7 +334,7 @@ int main(int argc, char *argv[])
 	ctx1->servername = servername;
 	ctx1->client	 = client;
 	page_size 		 = sysconf(_SC_PAGESIZE);
-	ctx1->buf 		 = malloc(size);//memalign(page_size, size);
+	ctx1->buf 		 = memalign(page_size, size);
 	ctx1->size 		 = size;
 	memset(ctx1->buf,0,size);
 	if(ctx1->client == 1)
