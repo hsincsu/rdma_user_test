@@ -656,7 +656,7 @@ if(ctx1->client == 0)
 	number = 0;
 	do{
 		
-		printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 16);
+		printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 12);
 		usleep(250000);
 		number +=1;
 	}while(number < 280);
