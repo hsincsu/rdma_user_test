@@ -661,7 +661,7 @@ if(ctx1->client == 0)
 	}while(number >= 260);
 	
 	}
-	}
+	
 	
 	struct ibv_wc wc;
 	if(ibv_poll_cq(ctx1->cq_s.cq,1,&wc) >= 0)
