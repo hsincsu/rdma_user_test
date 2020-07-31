@@ -567,7 +567,7 @@ if(ctx1->client == 1)
 
 	memset(&wr,0,sizeof(wr));
 	wr.wr_id		= 	3;
-	wr.sg_list		= 	&list;
+	wr.sg_list		= 	&list[0];
 	wr.num_sge		=   2;
 	wr.opcode		=   IBV_WR_RDMA_WRITE;
 	wr.send_flags 	= 	IBV_SEND_SIGNALED;
