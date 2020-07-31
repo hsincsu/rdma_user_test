@@ -369,8 +369,8 @@ int main(int argc, char *argv[])
                         .cap     = {
                                 .max_send_wr  = 10,
                                 .max_recv_wr  = 10,
-                                .max_send_sge = 1,
-                                .max_recv_sge = 1
+                                .max_send_sge = 2,
+                                .max_recv_sge = 2
                         },
                         .qp_type = IBV_QPT_RC
                 };
