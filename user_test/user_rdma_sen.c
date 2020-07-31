@@ -562,7 +562,7 @@ if(ctx1->client == 1)
 	list[0].lkey	=  ctx1->mr->lkey;
 
 	list[1].addr    =  (uintptr_t)ctx1->buf + 16;
-	list[1].length	=  ctx1->size - 16;
+	list[1].length	=  12;
 	list[1].lkey	=  ctx1->mr->lkey;
 
 	memset(&wr,0,sizeof(wr));
@@ -587,13 +587,13 @@ if(ctx1->client == 1)
 	memset(ctx1->buf,0,size);
 	if(i%2 == 0){
 	snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
-	snprintf(ctx1->buf + 16,16,"%s,%d","hi",i);
+	snprintf(ctx1->buf + 16,12,"%s","hi");
 	printf("send buf: %s \n",ctx1->buf);
 	}  
 	else 
 	{
 	snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
-	snprintf(ctx1->buf + 16,16,"%s,%d","hi",i);
+	snprintf(ctx1->buf + 16,12,"%s","hi");
 	printf("send buf: %s \n",ctx1->buf);
 	}
 	
@@ -655,10 +655,11 @@ if(ctx1->client == 0)
 
 	number = 0;
 	do{
-		if(*(int *)ctx1->buf != 0)
-		{printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 16);number += 1;}
-		memset(ctx1->buf,0,sizeof(int));
-	}while(number <= 400);
+		
+		printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 16);
+		usleep(250000);
+		number +=1;
+	}while(number < 280);
 	
 	}
 	
