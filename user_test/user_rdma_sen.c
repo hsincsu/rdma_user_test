@@ -656,9 +656,9 @@ if(ctx1->client == 0)
 	number = 0;
 	do{
 		if(*(int *)ctx1->buf != 0)
-		{printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 16);memset(ctx1->buf,0,32);number += 1;}
-
-	}while(number <= 260);
+		{printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 16);number += 1;}
+		memset(ctx1->buf,0,sizeof(int));
+	}while(number <= 268);
 	
 	}
 	
