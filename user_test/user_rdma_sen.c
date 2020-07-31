@@ -552,19 +552,23 @@ if(ctx1->client == 1)
 	for(i = 0;i < number ;i++)
 	{
 	printf("In RDMA WRITE \n");
-	struct ibv_sge list;
+	struct ibv_sge list[2];
 	struct ibv_send_wr wr;
 	struct ibv_send_wr *bad_wr;
 
 	memset(&list,0,sizeof(list));
-	list.addr 	=  (uintptr_t)ctx1->buf;
-	list.length	=  ctx1->size;
-	list.lkey	=  ctx1->mr->lkey;
+	list[0].addr 	=  (uintptr_t)ctx1->buf;
+	list[0].length	=  16;
+	list[0].lkey	=  ctx1->mr->lkey;
+
+	list[1].addr    =  (uintptr_t)ctx1->buf + 16;
+	list[1].length	=  ctx1->size - 16;
+	list[1].lkey	=  ctx1->mr->lkey;
 
 	memset(&wr,0,sizeof(wr));
 	wr.wr_id		= 	3;
 	wr.sg_list		= 	&list;
-	wr.num_sge		=   1;
+	wr.num_sge		=   2;
 	wr.opcode		=   IBV_WR_RDMA_WRITE;
 	wr.send_flags 	= 	IBV_SEND_SIGNALED;
 	wr.wr.rdma.remote_addr = (uintptr_t)qpinfo_r->addr.remote_addr;
@@ -583,11 +587,13 @@ if(ctx1->client == 1)
 	memset(ctx1->buf,0,size);
 	if(i%2 == 0){
 	snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
+	snprintf(ctx1->buf + 16,16,"%s,%d","hi",i);
 	printf("send buf: %s \n",ctx1->buf);
 	}  
 	else 
 	{
 	snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
+	snprintf(ctx1->buf + 16,16,"%s,%d","hi",i);
 	printf("send buf: %s \n",ctx1->buf);
 	}
 	
@@ -649,8 +655,8 @@ if(ctx1->client == 0)
 
 	number = number * 1.5;
 	for(i =0 ;i< number;i++){
-	printf("buf wait: %s \n",ctx1->buf);
-	memset(ctx1->buf,0,16);
+	printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 16);
+	memset(ctx1->buf,0,32);
 	usleep(250000);
 	}
 	}
