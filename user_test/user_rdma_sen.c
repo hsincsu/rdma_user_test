@@ -653,11 +653,16 @@ if(ctx1->client == 0)
 	printf("wait 5 seconds to read\n");
 	usleep(250000);
 
-	number = number * 1.5;
-	for(i =0 ;i< number;i++){
+	number = 0;
+	do{
+		if(*(int *)ctx1->buf != 0)
+			{printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 16),memset(ctx1->buf,0,32);number += 1;}
+
+	}while(number >= 260)
+	
 	printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 16);
 	memset(ctx1->buf,0,32);
-	usleep(250000);
+
 	}
 	}
 	
