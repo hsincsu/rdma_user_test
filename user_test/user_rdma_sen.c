@@ -653,13 +653,13 @@ if(ctx1->client == 0)
 	printf("wait 5 seconds to read\n");
 	usleep(125000);
 
-	number = 0;
+	
 	do{
 		
 		printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 12);
 		usleep(250000);
-		number +=1;
-	}while(number < 280);
+		number -=1;
+	}while(number > 0 );
 	
 	}
 	
