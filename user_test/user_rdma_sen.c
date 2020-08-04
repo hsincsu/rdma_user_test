@@ -566,9 +566,9 @@ if(ctx1->client == 1)
 	list[1].length	=  12;
 	list[1].lkey	=  ctx1->mr->lkey;
 
-	list[1].addr    =  (uintptr_t)ctx1->buf + 28;
-	list[1].length	=  4;
-	list[1].lkey	=  ctx1->mr->lkey;
+	list[2].addr    =  (uintptr_t)ctx1->buf + 28;
+	list[2].length	=  4;
+	list[2].lkey	=  ctx1->mr->lkey;
 
 	memset(&wr,0,sizeof(wr));
 	wr.wr_id		= 	3;
