@@ -551,7 +551,7 @@ if(ctx1->client == 1)
 	if(ctx1->mode == 0){
 	for(i = 0;i < number ;i++)
 	{
-	num = i%2?1:2;
+	num = i%2?2:1;
 	printf("In RDMA WRITE \n");
 	struct ibv_sge list[3];
 	struct ibv_send_wr wr;
