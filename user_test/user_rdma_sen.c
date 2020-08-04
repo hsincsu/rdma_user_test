@@ -592,14 +592,13 @@ if(ctx1->client == 1)
 	memset(ctx1->buf,0,size);
 	if(i%2 == 0){
 	snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
-	snprintf(ctx1->buf + 16,12,"%s","hi");
-	snprintf(ctx1->buf +28,4,"%d",i);
+	snprintf(ctx1->buf + 16,12,"%s%d","hi",i);
 	printf("send buf: %s \n",ctx1->buf);
 	}  
 	else 
 	{
 	snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
-	snprintf(ctx1->buf + 16,12,"%s","hi");
+	snprintf(ctx1->buf + 16,12,"%s%d","hi",i);
 	printf("send buf: %s \n",ctx1->buf);
 	}
 	
@@ -662,7 +661,7 @@ if(ctx1->client == 0)
 	
 	do{
 		
-		printf("buf wait: %s , sge2: %s , %d \n",ctx1->buf,ctx1->buf + 12,ctx1->buf+28);
+		printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 12);
 		usleep(250000);
 		number -=1;
 	}while(number > 0 );
