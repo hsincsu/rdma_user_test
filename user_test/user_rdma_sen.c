@@ -544,13 +544,14 @@ else
 			return 1;
 	}
 
-
+uint32_t num;
 if(ctx1->client == 1)
 {
 	
 	if(ctx1->mode == 0){
 	for(i = 0;i < number ;i++)
 	{
+	num = i%2?1:2;
 	printf("In RDMA WRITE \n");
 	struct ibv_sge list[3];
 	struct ibv_send_wr wr;
@@ -572,7 +573,7 @@ if(ctx1->client == 1)
 	memset(&wr,0,sizeof(wr));
 	wr.wr_id		= 	3;
 	wr.sg_list		= 	&list[0];
-	wr.num_sge		=   3;
+	wr.num_sge		=   num;
 	wr.opcode		=   IBV_WR_RDMA_WRITE;
 	wr.send_flags 	= 	IBV_SEND_SIGNALED;
 	wr.wr.rdma.remote_addr = (uintptr_t)qpinfo_r->addr.remote_addr;
