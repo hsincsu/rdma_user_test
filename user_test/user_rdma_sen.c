@@ -552,7 +552,7 @@ if(ctx1->client == 1)
 	for(i = 0;i < number ;i++)
 	{
 	printf("In RDMA WRITE \n");
-	struct ibv_sge list[2];
+	struct ibv_sge list[3];
 	struct ibv_send_wr wr;
 	struct ibv_send_wr *bad_wr;
 
@@ -563,6 +563,10 @@ if(ctx1->client == 1)
 
 	list[1].addr    =  (uintptr_t)ctx1->buf + 16;
 	list[1].length	=  12;
+	list[1].lkey	=  ctx1->mr->lkey;
+
+	list[1].addr    =  (uintptr_t)ctx1->buf + 28;
+	list[1].length	=  4;
 	list[1].lkey	=  ctx1->mr->lkey;
 
 	memset(&wr,0,sizeof(wr));
@@ -588,6 +592,7 @@ if(ctx1->client == 1)
 	if(i%2 == 0){
 	snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
 	snprintf(ctx1->buf + 16,12,"%s","hi");
+	snprintf(ctx1->buf +28,4,"%d",i);
 	printf("send buf: %s \n",ctx1->buf);
 	}  
 	else 
@@ -656,7 +661,7 @@ if(ctx1->client == 0)
 	
 	do{
 		
-		printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 12);
+		printf("buf wait: %s , sge2: %s , %d \n",ctx1->buf,ctx1->buf + 12,ctx1->buf+28);
 		usleep(250000);
 		number -=1;
 	}while(number > 0 );
