@@ -656,7 +656,7 @@ if(ctx1->client == 1)
 if(ctx1->client == 0)
 	{
 	printf("wait 5 seconds to read\n");
-	usleep(500);
+	usleep(25000);
 
 	
 	do{
