@@ -559,21 +559,21 @@ if(ctx1->client == 1)
 
 	memset(&list,0,sizeof(list));
 	list[0].addr 	=  (uintptr_t)ctx1->buf;
-	list[0].length	=  16;
+	list[0].length	=  size;
 	list[0].lkey	=  ctx1->mr->lkey;
 
-	list[1].addr    =  (uintptr_t)ctx1->buf + 16;
-	list[1].length	=  12;
-	list[1].lkey	=  ctx1->mr->lkey;
+	//list[1].addr    =  (uintptr_t)ctx1->buf + 16;
+	//list[1].length	=  12;
+	//list[1].lkey	=  ctx1->mr->lkey;
 
-	list[2].addr    =  (uintptr_t)ctx1->buf + 28;
-	list[2].length	=  4;
-	list[2].lkey	=  ctx1->mr->lkey;
+	//list[2].addr    =  (uintptr_t)ctx1->buf + 28;
+	//list[2].length	=  4;
+	//list[2].lkey	=  ctx1->mr->lkey;
 
 	memset(&wr,0,sizeof(wr));
 	wr.wr_id		= 	3;
 	wr.sg_list		= 	&list[0];
-	wr.num_sge		=   num;
+	wr.num_sge		=   1;
 	wr.opcode		=   IBV_WR_RDMA_WRITE;
 	wr.send_flags 	= 	IBV_SEND_SIGNALED;
 	wr.wr.rdma.remote_addr = (uintptr_t)qpinfo_r->addr.remote_addr;
