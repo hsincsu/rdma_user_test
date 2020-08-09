@@ -606,7 +606,7 @@ if(ctx1->client == 1)
 	
 	}
 	
-	
+post_send:
 	if(ctx1->mode == 1)
 	{
 		for(i = 0;i < number ;i++)
@@ -681,6 +681,47 @@ if(ctx1->client == 0)
 		printf("poll wrong\n");
 		return 1;
 	}
+
+	int temper;
+
+	do{
+	printf("continue: 0-exit, 1-continue\n");
+	scanf("%d",&temper);
+	if(temper)
+	{
+		if(ctx1->client==0 && ctx1->mod == 1)
+		{
+				for(i = 0; i< number; i++)
+		{
+		printf("In SEND/RECV");
+		struct ibv_sge list = {
+				.addr 	= (uintptr_t)ctx1->buf,
+				.length = ctx1->size,
+				.lkey	= ctx1->mr->lkey 
+		};
+
+		struct ibv_recv_wr wr= {
+				.wr_id		= (int)&list,
+				.sg_list 	= &list,
+				.num_sge 	= 1,
+		};
+
+		struct ibv_recv_wr *bad_wr;
+		if(ibv_post_recv(ctx1->qp, &wr, &bad_wr))
+		{
+				fprintf(stderr, "Couldn't post recv\n");
+				return 1;
+		}
+		printf("post success\n");
+		
+		}
+		}
+
+		if(ctx1->client == 1 && ctx1->mode == 1)
+			goto post_send;
+	}
+	
+	}while(temper);
 
 clean_qp:
 	ibv_destroy_qp(ctx1->qp);
