@@ -651,6 +651,7 @@ post_send:
 	}
 }
 
+int tempnumber = number;
 
 	printf("buf: %s \n",ctx1->buf);
 if(ctx1->client == 0)
@@ -666,8 +667,8 @@ if(ctx1->client == 0)
 		printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 12);
 		if(ctx1->mode == 1)
 			usleep(250000);
-		number -=1;
-	}while(number > 0 );
+		tempnumber -=1;
+	}while(tempnumber > 0 );
 	
 	}
 	
