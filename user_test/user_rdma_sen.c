@@ -689,7 +689,7 @@ if(ctx1->client == 0)
 	scanf("%d",&temper);
 	if(temper)
 	{
-		if(ctx1->client==0 && ctx1->mod == 1)
+		if(ctx1->client==0 && ctx1->mode == 1)
 		{
 				for(i = 0; i< number; i++)
 		{
