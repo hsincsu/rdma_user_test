@@ -140,7 +140,7 @@ while(1){
         {
             printf("write reg addr\n");
             printf("write(integer):");
-            scanf("%d",&buf[5]);
+            scanf("%x",&buf[5]);
             printf("regaddr:0x%x\n",buf[5]);
             ioctl_operation(GET_REG,(int *)buf);
             printf("regval:0x%x\n",buf[6]);
