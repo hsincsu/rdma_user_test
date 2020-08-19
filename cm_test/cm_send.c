@@ -171,8 +171,8 @@ while(1){
             if(i == 0)
             break;
             printf("write val \n");
-            scanf("%d",addr+1);
-            printf("val:0x%x\n",*(addr+1));
+           // scanf("%d",addr+1);
+            printf("val:0x%x\n",*(addr));
 
         }while(1);
         close(fd);
