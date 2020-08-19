@@ -72,15 +72,16 @@ while(1){
     printf("| 6. WRITE KERNEL ADDR VALUE                            |\n");
     printf("| 7. destroy dma addr                                   |\n");
     printf("| 8. get reg                                            |\n");
+    printf("| 9. mmapfun                                            |\n");
     printf("| other function may support later                      |\n");
-    printf("| 9. exit                                               |\n");
+    printf("| 10. exit                                               |\n");
     printf("---------------------------------------------------------\n");
 
     while(1){
     printf("please choose:");
     if(scanf("%d",&choose) == 1 && choose > 0)
     {
-    if(1 <= choose && 9 >= choose )
+    if(1 <= choose && 10 >= choose )
         break;
     else
     {
@@ -146,10 +147,35 @@ while(1){
             printf("regval:0x%x\n",buf[6]);
             break;
         }
+        case 9:
+        int i = 1;
+        int fd;
+        uint64_t phyaddr;
+        u8 *addr;
+        fd = open("/dev/cm_rw",O_RDWR);
+        if(fd < 0){
+            printf("can't open /dev/cm_rw \n");
+            return ;
+            }
+        printf("please enter phyaddr\n");
+        scanf("%x",&phyaddr)
+        addr = mmap(NULL,phyaddr,PROT_READ|PORT_WRITE,MAP_SHARED,fd,4096);
+        if(addr == MAP_FAILED)
+            break;
+        
+        do{
+            printf("(1-continue,0-exit:\n");
+            scanf("%d",&i);
+
+            printf("write val \n");
+            scanf(addr);
+
+        }while(1);
+        close(fd);
         default:
             break;
     }
-    if(choose == 9)
+    if(choose == 10)
         break;
 
     }
