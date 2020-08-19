@@ -168,9 +168,11 @@ while(1){
         do{
             printf("(1-continue,0-exit:\n");
             scanf("%d",&i);
-
+            if(i == 0)
+            break;
             printf("write val \n");
             scanf("%d",addr+1);
+            printf("val:0x%x\n",*(addr+1));
 
         }while(1);
         close(fd);
