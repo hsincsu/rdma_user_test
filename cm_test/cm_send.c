@@ -148,6 +148,7 @@ while(1){
             break;
         }
         case 9:
+        {
         int i = 1;
         int fd;
         uint64_t phyaddr;
@@ -172,6 +173,7 @@ while(1){
 
         }while(1);
         close(fd);
+        }
         default:
             break;
     }
