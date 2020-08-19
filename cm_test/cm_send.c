@@ -161,7 +161,7 @@ while(1){
             }
         printf("please enter phyaddr\n");
         scanf("%x",&phyaddr);
-        addr = mmap(NULL,phyaddr,PROT_READ|PORT_WRITE,MAP_SHARED,fd,4096);
+        addr = mmap(NULL,phyaddr,PROT_READ|PROT_WRITE,MAP_SHARED,fd,4096);
         if(addr == MAP_FAILED)
             break;
         
