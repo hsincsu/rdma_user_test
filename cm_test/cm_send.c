@@ -152,7 +152,7 @@ while(1){
         int i = 1;
         int fd;
         uint64_t phyaddr;
-        u8 *addr;
+        uint8_t *addr;
         fd = open("/dev/cm_rw",O_RDWR);
         if(fd < 0){
             printf("can't open /dev/cm_rw \n");
