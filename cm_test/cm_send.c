@@ -26,6 +26,7 @@
 #define PRINT_PGU	   (unsigned int) 4
 #define PRINT_PHD	   (unsigned int) 5
 #define DESTROY_ADDR   (unsigned int) 7
+#define GET_REG        (unsigned int) 8
 
 ioctl_operation(int cmd, int *buf)
 {
@@ -44,7 +45,7 @@ ioctl_operation(int cmd, int *buf)
 int main(int argc, char *argv[])
 {
     int fd;
-    uint64_t buf[5];
+    uint64_t buf[7];
     int buflen;
     int data;    
     int choose = 0;
@@ -70,15 +71,16 @@ while(1){
     printf("| 5. READ KERNEL ADDR VALUE                             |\n");
     printf("| 6. WRITE KERNEL ADDR VALUE                            |\n");
     printf("| 7. destroy dma addr                                   |\n");
+    printf("| 8. get reg                                            |\n");
     printf("| other function may support later                      |\n");
-    printf("| 8. exit                                               |\n");
+    printf("| 9. exit                                               |\n");
     printf("---------------------------------------------------------\n");
 
     while(1){
     printf("please choose:");
     if(scanf("%d",&choose) == 1 && choose > 0)
     {
-    if(1 <= choose && 8 >= choose )
+    if(1 <= choose && 9 >= choose )
         break;
     else
     {
@@ -134,10 +136,20 @@ while(1){
         {
             ioctl_operation(DESTROY_ADDR,(int *)buf);break;
         }
+        case 8:
+        {
+            printf("write reg addr\n");
+            printf("write(integer):");
+            scanf("%d",&buf[5]);
+            printf("regaddr:0x%x\n",buf[5]);
+            ioctl_operation(GET_REG,(int *)buf);
+            printf("regval:0x%x\n",buf[6]);
+            break;
+        }
         default:
             break;
     }
-    if(choose == 8)
+    if(choose == 9)
         break;
 
     }
