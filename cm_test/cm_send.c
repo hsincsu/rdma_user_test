@@ -172,7 +172,7 @@ while(1){
             break;
             printf("write val \n");
            // scanf("%d",addr+1);
-            printf("val:0x%x\n",*(int *)(addr));
+            printf("val:0x%x\n",*(int *)(addr+1));
 
         }while(1);
         close(fd);
