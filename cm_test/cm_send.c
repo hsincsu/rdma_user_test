@@ -170,7 +170,7 @@ while(1){
             scanf("%d",&i);
 
             printf("write val \n");
-            scanf(addr);
+            scanf("%d",addr+1);
 
         }while(1);
         close(fd);
