@@ -673,7 +673,7 @@ if(ctx1->client == 0)
 	}
 	
 	
-	struct ibv_wc wc[number];
+	struct ibv_wc wc[20];
 	if(ibv_poll_cq(ctx1->cq_s.cq,number,&wc[0]) >= 0)
 	{
 		printf("poll success\n");
