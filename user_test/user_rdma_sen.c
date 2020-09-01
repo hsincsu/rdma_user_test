@@ -587,7 +587,7 @@ if(ctx1->client == 1)
 	printf("post success \n");
 	
 	printf("sleep 2 seconds\n");
-	//usleep(250000);
+	usleep(250000);
 	printf("write again\n");
 	memset(ctx1->buf,0,size);
 	if(i%2 == 0){
@@ -673,8 +673,8 @@ if(ctx1->client == 0)
 	}
 	
 	
-	struct ibv_wc wc;
-	if(ibv_poll_cq(ctx1->cq_s.cq,1,&wc) >= 0)
+	struct ibv_wc wc[number];
+	if(ibv_poll_cq(ctx1->cq_s.cq,number,&wc) >= 0)
 	{
 		printf("poll success\n");
 	}
