@@ -675,7 +675,7 @@ if(ctx1->client == 0)
 	
 	while(number){
 	
-	struct ibv_wc wc[20];
+	struct ibv_wc wc[50];
 	if(tempnuma = ibv_poll_cq(ctx1->cq_s.cq,number,&wc[0]) > 0)
 	{
 		printf("poll success\n");
