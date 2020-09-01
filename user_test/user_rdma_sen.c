@@ -391,7 +391,7 @@ int main(int argc, char *argv[])
 				  IBV_QP_PORT               |
 				  IBV_QP_ACCESS_FLAGS)) {
 			fprintf(stderr, "Failed to modify QP to INIT\n");
-            goto clean_qp;
+            	goto clean_qp;
                   }
 	printf("modify qp init success\n");
 
@@ -674,7 +674,7 @@ if(ctx1->client == 0)
 	
 	
 	struct ibv_wc wc[number];
-	if(ibv_poll_cq(ctx1->cq_s.cq,number,&wc) >= 0)
+	if(ibv_poll_cq(ctx1->cq_s.cq,number,&wc[0]) >= 0)
 	{
 		printf("poll success\n");
 	}
