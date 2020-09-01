@@ -671,18 +671,22 @@ if(ctx1->client == 0)
 	}while(tempnumber > 0 );
 	
 	}
+	int tempnuma;
 	
+	while(number){
 	
 	struct ibv_wc wc[20];
-	if(ibv_poll_cq(ctx1->cq_s.cq,number,&wc[0]) >= 0)
+	if(tempnuma = ibv_poll_cq(ctx1->cq_s.cq,number,&wc[0]) > 0)
 	{
 		printf("poll success\n");
+		number -= tempnuma;
+		
 	}
 	else{
-		printf("poll wrong\n");
-		return 1;
+		//printf("poll wrong\n");
+		//return 1;
 	}
-
+	}
 	int temper;
 
 	do{
