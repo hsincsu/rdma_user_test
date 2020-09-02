@@ -357,7 +357,7 @@ int main(int argc, char *argv[])
 	ctx1->shmid = shmget(IPC_PRIVATE, size,
                                  SHM_HUGETLB | IPC_CREAT | SHM_R | SHM_W);
 	ctx1->size = size;
-
+	printf("size:0x%x \n",size);
 	ctx1->buf = (char *) shmat(ctx1->shmid,  SHMAT_ADDR, SHMAT_FLAGS);
 
 
