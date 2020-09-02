@@ -547,7 +547,7 @@ else
                 return 1;
         }
 	
-
+if(!(mode == 1 && ctx1->client == 0)){
 
 		attr.qp_state       = IBV_QPS_RTS;
         attr.timeout        = 14;
@@ -567,7 +567,7 @@ else
 			fprintf(stderr, "Failed to modify QP to RTS\n");
 			return 1;
 	}
-
+}
 uint32_t num;
 if(ctx1->client == 1)
 {
