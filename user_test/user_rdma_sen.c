@@ -657,9 +657,9 @@ int tempnumber = number;
 if(ctx1->client == 0)
 	{
 	printf("wait 5 seconds to read\n");
-	if(ctx1->mode == 1)
+	//if(ctx1->mode == 1)
 	//usleep(25000);
-	else 
+	//else 
 	//usleep(500);
 	
 	do{
