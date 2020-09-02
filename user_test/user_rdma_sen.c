@@ -688,7 +688,7 @@ if(ctx1->client == 0)
 	
 	do{
 		
-		printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 12);
+		printf("buf wait: %d , sge2: %s \n",*(ctx1->buf + tempnumber*64),ctx1->buf + 12);
 		if(ctx1->mode == 1)
 			//usleep(250000);
 		tempnumber -=1;
