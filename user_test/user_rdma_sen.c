@@ -641,8 +641,8 @@ post_send:
 		struct ibv_send_wr *bad_wr;
 
 		memset(&list,0,sizeof(list));
-		list.addr 	=  (uintptr_t)ctx1->buf + i;
-		list.length	=  1;//ctx1->size;
+		list.addr 	=  (uintptr_t)ctx1->buf + i*16;
+		list.length	=  16;//ctx1->size;
 		list.lkey	=  ctx1->mr->lkey;
 
 		memset(&wr,0,sizeof(wr));
@@ -663,13 +663,13 @@ post_send:
         printf("write again\n");
         memset(ctx1->buf,0,size);
         if(i%2 == 0){
-        snprintf(ctx1->buf+i,1,"%c",i+65);
-        printf("send buf: %c \n",*(ctx1->buf+i));
+        snprintf(ctx1->buf+i*16,4,"%d",i);
+        printf("send buf: %d \n",*(ctx1->buf+i*16));
         }  
         else 
         {
-        snprintf(ctx1->buf+i,1,"%c",i+65);
-        printf("send buf: %s \n",*(ctx1->buf+i));
+        snprintf(ctx1->buf+i*16,4,"%d",i);
+        printf("send buf: %s \n",*(ctx1->buf+i*16));
         }
 		}
 	}
@@ -724,8 +724,8 @@ if(ctx1->client == 0)
 		{
 		printf("In SEND/RECV");
 		struct ibv_sge list = {
-				.addr 	= (uintptr_t)ctx1->buf,
-				.length = ctx1->size,
+				.addr 	= (uintptr_t)ctx1->buf+i*16,
+				.length = 16,
 				.lkey	= ctx1->mr->lkey 
 		};
 
