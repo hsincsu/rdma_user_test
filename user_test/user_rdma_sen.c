@@ -617,8 +617,8 @@ post_send:
 		struct ibv_send_wr *bad_wr;
 
 		memset(&list,0,sizeof(list));
-		list.addr 	=  (uintptr_t)ctx1->buf;
-		list.length	=  ctx1->size;
+		list.addr 	=  (uintptr_t)ctx1->buf + i;
+		list.length	=  1;//ctx1->size;
 		list.lkey	=  ctx1->mr->lkey;
 
 		memset(&wr,0,sizeof(wr));
@@ -639,13 +639,13 @@ post_send:
         printf("write again\n");
         memset(ctx1->buf,0,size);
         if(i%2 == 0){
-        snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
-        printf("send buf: %s \n",ctx1->buf);
+        snprintf(ctx1->buf+i,1,"%c",i+65);
+        printf("send buf: %c \n",*(ctx1->buf+i));
         }  
         else 
         {
-        snprintf(ctx1->buf,16,"%s,%d","hello,world",i);
-        printf("send buf: %s \n",ctx1->buf);
+        snprintf(ctx1->buf+i,1,"%c",i+65);
+        printf("send buf: %s \n",*(ctx1->buf+i));
         }
 		}
 	}
