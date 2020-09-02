@@ -18,6 +18,10 @@
 
 #include <infiniband/verbs.h>
 
+#define HUGEPAGE_ALIGN  (2*1024*1024)
+#define SHMAT_ADDR (void *)(0x0UL)
+#define SHMAT_FLAGS (0)
+
 #define strdupa(_s)                                             \
 ({                                                              \
         char *_d;                                               \
@@ -347,12 +351,14 @@ int main(int argc, char *argv[])
 	
 	//ctx1->buf 		 = memalign(page_size, size);
 	//ctx1->size 		 = size;
-	size = roundup(size,4096);
+	int alignment = (((page_size + HUGEPAGE_ALIGN -1) / HUGEPAGE_ALIGN) * HUGEPAGE_ALIGN);
+		size = (((size + alignment -1 ) / alignment ) * alignment);
+
 	ctx1->shmid = shmget(IPC_PRIVATE, size,
                                  SHM_HUGETLB | IPC_CREAT | SHM_R | SHM_W);
 	ctx1->size = size;
 
-	ctx1->buf = (char *) shmat(ctx1->shmid, NULL, 0);
+	ctx1->buf = (char *) shmat(ctx1->shmid,  SHMAT_ADDR, SHMAT_FLAGS);
 
 
 	if (shmctl(ctx1->shmid, IPC_RMID, 0) != 0) {
