@@ -356,7 +356,7 @@ int main(int argc, char *argv[])
 
 	if (shmctl(ctx1->shmid, IPC_RMID, 0) != 0) {
                 fprintf(stderr, "Failed to mark shm for removal\n");
-                return FAILURE;
+                return -1;
         }
 
 
