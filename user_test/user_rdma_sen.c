@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <sys/shm.h>
 #include <netdb.h>
 #include <malloc.h>
 #include <getopt.h>
@@ -42,6 +43,7 @@ struct pingpong_context {
 		int       	 			gidx;
 		int						client;
 		int						mode;
+		int 					shmid;
         union {
                 struct ibv_cq           *cq;
                 struct ibv_cq_ex        *cq_ex;
@@ -341,8 +343,23 @@ int main(int argc, char *argv[])
 	ctx1->servername = servername;
 	ctx1->client	 = client;
 	page_size 		 = sysconf(_SC_PAGESIZE);
-	ctx1->buf 		 = memalign(page_size, size);
-	ctx1->size 		 = size;
+	
+	//ctx1->buf 		 = memalign(page_size, size);
+	//ctx1->size 		 = size;
+	size = roundup(size,4096);
+	ctx1->shmid = shmget(IPC_PRIVATE, size,
+                                 SHM_HUGETLB | IPC_CREAT | SHM_R | SHM_W);
+	ctx1->size = size;
+
+	ctx1->buf = (char *) shmat(ctx->huge_shmid, NULL, 0);
+
+
+	if (shmctl(ctx->shmid, IPC_RMID, 0) != 0) {
+                fprintf(stderr, "Failed to mark shm for removal\n");
+                return FAILURE;
+        }
+
+
 	memset(ctx1->buf,0,size);
 	if(ctx1->client == 1)
 	memcpy(ctx1->buf,"hello,world",12);
