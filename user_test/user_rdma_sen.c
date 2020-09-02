@@ -351,10 +351,10 @@ int main(int argc, char *argv[])
                                  SHM_HUGETLB | IPC_CREAT | SHM_R | SHM_W);
 	ctx1->size = size;
 
-	ctx1->buf = (char *) shmat(ctx->huge_shmid, NULL, 0);
+	ctx1->buf = (char *) shmat(ctx1->shmid, NULL, 0);
 
 
-	if (shmctl(ctx->shmid, IPC_RMID, 0) != 0) {
+	if (shmctl(ctx1->shmid, IPC_RMID, 0) != 0) {
                 fprintf(stderr, "Failed to mark shm for removal\n");
                 return FAILURE;
         }
