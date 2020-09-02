@@ -14,7 +14,7 @@
 #include <arpa/inet.h>
 #include <time.h>
 #include <inttypes.h>
-#inlcude <math.h>
+#include <math.h>
 
 #include <infiniband/verbs.h>
 
