@@ -433,7 +433,7 @@ int main(int argc, char *argv[])
 		{
 		printf("In SEND/RECV");
 		struct ibv_sge list = {
-				.addr 	= (uintptr_t)ctx1->buf+i*16,
+				.addr 	= (uintptr_t)ctx1->buf+i*64,
 				.length = 16,
 				.lkey	= ctx1->mr->lkey 
 		};
