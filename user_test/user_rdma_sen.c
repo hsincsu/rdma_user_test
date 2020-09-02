@@ -635,7 +635,7 @@ post_send:
 		} 
 		printf("post success \n");
 		printf("sleep 2 seconds\n");
-       	usleep(250000);
+       	//usleep(250000);
         printf("write again\n");
         memset(ctx1->buf,0,size);
         if(i%2 == 0){
@@ -658,15 +658,15 @@ if(ctx1->client == 0)
 	{
 	printf("wait 5 seconds to read\n");
 	if(ctx1->mode == 1)
-	usleep(25000);
+	//usleep(25000);
 	else 
-	usleep(500);
+	//usleep(500);
 	
 	do{
 		
 		printf("buf wait: %s , sge2: %s \n",ctx1->buf,ctx1->buf + 12);
 		if(ctx1->mode == 1)
-			usleep(250000);
+			//usleep(250000);
 		tempnumber -=1;
 	}while(tempnumber > 0 );
 	
