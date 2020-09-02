@@ -641,7 +641,7 @@ post_send:
 		struct ibv_send_wr *bad_wr;
 
 		memset(&list,0,sizeof(list));
-		list.addr 	=  (uintptr_t)ctx1->buf + i*16;
+		list.addr 	=  (uintptr_t)ctx1->buf + i*64;
 		list.length	=  16;//ctx1->size;
 		list.lkey	=  ctx1->mr->lkey;
 
