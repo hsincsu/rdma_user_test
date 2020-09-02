@@ -663,13 +663,13 @@ post_send:
         printf("write again\n");
         memset(ctx1->buf,0,size);
         if(i%2 == 0){
-        snprintf(ctx1->buf+i*16,4,"%d",i);
+        snprintf(ctx1->buf+(i+1)*16,16,"%d",i);
         printf("send buf: %d \n",*(ctx1->buf+i*16));
         }  
         else 
         {
-        snprintf(ctx1->buf+i*16,4,"%d",i);
-        printf("send buf: %s \n",*(ctx1->buf+i*16));
+        snprintf(ctx1->buf+(i+1)*16,16,"%d",i);
+        printf("send buf: %d \n",*(ctx1->buf+i*16));
         }
 		}
 	}
