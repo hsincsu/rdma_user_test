@@ -642,7 +642,10 @@ post_send:
 
 		memset(&list,0,sizeof(list));
 		list.addr 	=  (uintptr_t)ctx1->buf + i*64;
+		if(i<15)
 		list.length	=  16;//ctx1->size;
+		else
+		list.length =  8;		
 		list.lkey	=  ctx1->mr->lkey;
 
 		memset(&wr,0,sizeof(wr));
